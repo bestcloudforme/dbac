@@ -8,7 +8,9 @@ This document provides an overview of the functionalities provided by the Databa
 
 - [dbac (\[dee-BEK\] the coffee) Database Command Line Interface (CLI) Documentation](#dbac-dee-bek-the-coffee-database-command-line-interface-cli-documentation)
   - [Table of Contents](#table-of-contents)
-  - [Installation](#installation)
+  - [Installation - Build from Source](#installation---build-from-source)
+    - [Prerequisites](#prerequisites)
+    - [Build Instructions](#build-instructions)
   - [Usage](#usage)
     - [General Commands](#general-commands)
     - [Profile Commands](#profile-commands)
@@ -25,7 +27,16 @@ This document provides an overview of the functionalities provided by the Databa
   - [Contributing](#contributing)
   - [License](#license)
 
-## Installation
+## Installation - Build from Source
+
+To build the CLI tool from source, you will need to have `go` installed on your machine. The source code also uses `make` to simplify the build and installation process.
+
+### Prerequisites
+
+- Install [Go](https://golang.org/dl/) (version 1.14 or higher)
+- Install [Make](https://www.gnu.org/software/make/)
+
+### Build Instructions
 
 1. Clone the repository:
 
@@ -37,13 +48,15 @@ cd dbac
 2. Build the CLI:
 
 ```bash
-go build -o dbac main.go
+make build
 ```
 
-3. Run the CLI:
+3. Install the Binary:
+
+If you want to use `dbac` system-wide, you can move the binary to `/usr/local/bin`. This step may require superuser privileges.
 
 ```bash
-./dbac
+sudo mv .bin/dbac /usr/local/bin
 ```
 
 ## Usage

@@ -3,8 +3,8 @@ package psql
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -65,7 +65,7 @@ func FileExec(filename string) {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
 	}
-	file, err := ioutil.ReadFile(filename)
+	file, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatalf("Failed to read SQL file: %v", err)
 	}

@@ -3,7 +3,6 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -28,7 +27,7 @@ type Profiles struct {
 func ReadProfile(profileName string) Profile {
 	var profiles Profiles
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		log.Fatalf("Failed to read the profile file: %v", err)
 	}
@@ -72,7 +71,7 @@ func AddProfile(dbtype, host, user, password, database, port, name string) {
 			Current:  name,
 		}
 	} else {
-		data, err := ioutil.ReadFile(profilePath)
+		data, err := os.ReadFile(profilePath)
 		if err != nil {
 			log.Fatalf("Failed to read profile file: %v", err)
 		}
@@ -112,7 +111,7 @@ func writeProfilesToFile(profiles Profiles, filePath string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filePath, jsonData, 0644)
+	return os.WriteFile(filePath, jsonData, 0644)
 }
 
 func AddFileProfile(file string) {
@@ -165,7 +164,7 @@ func DeleteProfile(name string) {
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
 	var allProfiles Profiles
 
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		log.Fatalf("Failed to read profile file: %v", err)
 	}
@@ -216,7 +215,7 @@ func DeleteProfile(name string) {
 
 func ListProfiles() {
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			fmt.Println("No profiles found.")
@@ -246,7 +245,7 @@ func ListProfiles() {
 
 func SwitchProfile(profilename string) {
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		log.Fatalf("Failed to read profile file: %v", err)
 	}
@@ -299,7 +298,7 @@ func InitProfile() {
 	var allProfiles Profiles
 
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			allProfiles.Current = profile.Name
@@ -331,13 +330,15 @@ func InitProfile() {
 
 func collectProfileData() Profile {
 	var profile Profile
-	var dbtype string
-	var defaultPort string
+	var dbtype, defaultPort string
+	var err error
 
 	for {
 		fmt.Println("Database Type (Choices: mysql, psql)")
 		fmt.Print("-> ")
-		fmt.Scan(&dbtype)
+		if _, err = fmt.Scan(&dbtype); err != nil {
+			log.Fatalf("Failed to read input: %v", err)
+		}
 		if dbtype == "mysql" || dbtype == "psql" {
 			profile.DbType = dbtype
 			break
@@ -354,25 +355,35 @@ func collectProfileData() Profile {
 	fmt.Println("--------")
 	fmt.Println("Database Host Address (e.g., localhost, 10.0.0.10, mydatabase.example.com)")
 	fmt.Print("-> ")
-	fmt.Scan(&profile.Host)
+	if _, err = fmt.Scan(&profile.Host); err != nil {
+		log.Fatalf("Failed to read input: %v", err)
+	}
 
 	fmt.Println("--------")
 	fmt.Println("Database Username")
 	fmt.Print("-> ")
-	fmt.Scan(&profile.User)
+	if _, err = fmt.Scan(&profile.User); err != nil {
+		log.Fatalf("Failed to read input: %v", err)
+	}
 
 	fmt.Println("--------")
 	fmt.Println("Database Password")
 	fmt.Print("-> ")
-	fmt.Scan(&profile.Password)
+	if _, err = fmt.Scan(&profile.Password); err != nil {
+		log.Fatalf("Failed to read input: %v", err)
+	}
 
 	fmt.Println("--------")
 	fmt.Printf("Database Name to Connect (e.g., postgres, mysql, testdb)\n-> ")
-	fmt.Scan(&profile.Database)
+	if _, err = fmt.Scan(&profile.Database); err != nil {
+		log.Fatalf("Failed to read input: %v", err)
+	}
 
 	fmt.Println("--------")
 	fmt.Printf("Database Port (Default: %s for %s)\n-> ", defaultPort, dbtype)
-	fmt.Scan(&profile.Port)
+	if _, err = fmt.Scan(&profile.Port); err != nil {
+		log.Fatalf("Failed to read input: %v", err)
+	}
 	if profile.Port == "" {
 		profile.Port = defaultPort
 	}
@@ -380,7 +391,9 @@ func collectProfileData() Profile {
 	fmt.Println("--------")
 	fmt.Println("Profile Name (how you will refer to this profile in CLI)")
 	fmt.Print("-> ")
-	fmt.Scan(&profile.Name)
+	if _, err = fmt.Scan(&profile.Name); err != nil {
+		log.Fatalf("Failed to read input: %v", err)
+	}
 
 	return profile
 }

@@ -95,10 +95,14 @@ func listUsers() {
 }
 
 func createUser(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("create-user", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user")
 	userPassword := cmd.String("user-password", "", "Password for the new database user")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" || *userPassword == "" {
 		fmt.Println("Usage: dbac database create-user --username [USERNAME] --user-password [PASSWORD]")
@@ -119,9 +123,13 @@ func createUser(params []string) {
 }
 
 func createDatabase(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("create-database", flag.ExitOnError)
 	databaseName := cmd.String("database", "", "Database name to be created")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments for creating database: %v\n", err)
+		return
+	}
 
 	if *databaseName == "" {
 		fmt.Println("Usage: dbac database create-database --database [DATABASE]")
@@ -142,9 +150,13 @@ func createDatabase(params []string) {
 }
 
 func deleteUser(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("delete-user", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user to be deleted")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" {
 		fmt.Println("Usage: dbac database delete-user --username [USERNAME]")
@@ -165,9 +177,13 @@ func deleteUser(params []string) {
 }
 
 func deleteDatabase(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("delete-database", flag.ExitOnError)
 	databaseName := cmd.String("database", "", "Database name to be deleted")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *databaseName == "" {
 		fmt.Println("Usage: dbac database delete-database --database [DATABASE]")
@@ -188,10 +204,14 @@ func deleteDatabase(params []string) {
 }
 
 func changePassword(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("change-password", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user")
 	newPassword := cmd.String("new-password", "", "New password of the user")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" || *newPassword == "" {
 		fmt.Println("Usage: dbac database change-password --username [USERNAME] --new-password [NEW_PASSWORD]")
@@ -212,11 +232,15 @@ func changePassword(params []string) {
 }
 
 func grantDatabase(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("grant-database", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user")
 	permission := cmd.String("permission", "", "Permission of the user")
 	databaseName := cmd.String("database", "", "Database to grant permission on")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" || *permission == "" || *databaseName == "" {
 		fmt.Println("Usage: dbac database grant-database --username [USERNAME] --permission [PERMISSION] --database [DATABASE]")
@@ -237,11 +261,15 @@ func grantDatabase(params []string) {
 }
 
 func grantTable(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("grant-table", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user")
 	permission := cmd.String("permission", "", "Permission of the user")
 	table := cmd.String("table", "", "Table to grant permission on")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" || *permission == "" || *table == "" {
 		fmt.Println("Usage: dbac database grant-table --username [USERNAME] --permission [PERMISSION] --table [TABLE]")
@@ -262,11 +290,15 @@ func grantTable(params []string) {
 }
 
 func revokeDatabase(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("revoke-database", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user")
 	permission := cmd.String("permission", "", "Permission of the user")
 	databaseName := cmd.String("database", "", "Database to revoke permission from")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" || *permission == "" || *databaseName == "" {
 		fmt.Println("Usage: dbac database revoke-database --username [USERNAME] --permission [PERMISSION] --database [DATABASE]")
@@ -287,11 +319,15 @@ func revokeDatabase(params []string) {
 }
 
 func revokeTable(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("revoke-table", flag.ExitOnError)
 	username := cmd.String("username", "", "Username of the user")
 	permission := cmd.String("permission", "", "Permission of the user")
 	table := cmd.String("table", "", "Table to revoke permission from")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *username == "" || *permission == "" || *table == "" {
 		fmt.Println("Usage: dbac database revoke-table --username [USERNAME] --permission [PERMISSION] --table [TABLE]")
@@ -340,10 +376,14 @@ func listTables() {
 }
 
 func execQuery(params []string) {
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	cmd := flag.NewFlagSet("exec-query", flag.ExitOnError)
 	query := cmd.String("query", "", "Query to be executed")
 	file := cmd.String("file", "", "SQL file path")
-	cmd.Parse(params)
+
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
 
 	if *query == "" && *file == "" {
 		fmt.Println("Usage: dbac database exec --query [QUERY] or --file [FILE]")

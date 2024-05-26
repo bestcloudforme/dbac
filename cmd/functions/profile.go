@@ -33,7 +33,11 @@ func Profile(params []string) {
 		database := cmd.String("database", "", "Database name")
 		name := cmd.String("profile-name", "", "Profile name for pre-configured database connections")
 		file := cmd.String("file", "", "Path to file with profile details")
-		cmd.Parse(params[2:])
+
+		if err := cmd.Parse(params[2:]); err != nil {
+			fmt.Printf("Error parsing arguments: %v\n", err)
+			return
+		}
 
 		if *file == "" {
 			if *dbType == "" || *host == "" || *user == "" || *port == "" || *password == "" || *database == "" || *name == "" {
@@ -48,7 +52,12 @@ func Profile(params []string) {
 	case "delete":
 		cmd := flag.NewFlagSet("delete", flag.ExitOnError)
 		name := cmd.String("profile-name", "", "Profile name for pre-configured database connections")
-		cmd.Parse(params[2:])
+
+		if err := cmd.Parse(params[2:]); err != nil {
+			fmt.Printf("Error parsing arguments: %v\n", err)
+			return
+		}
+
 		if *name == "" {
 			fmt.Println("Usage: dbac profile delete --profile-name [PROFILE-NAME]")
 			return

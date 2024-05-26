@@ -3,8 +3,8 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
@@ -86,7 +86,7 @@ func Exec(query string) {
 
 // FileExec executes SQL commands from a file
 func FileExec(filename string) {
-	file, err := ioutil.ReadFile(filename)
+	file, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatalf("Failed to read SQL file: %v", err)
 	}

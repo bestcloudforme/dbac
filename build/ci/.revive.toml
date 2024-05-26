@@ -1,0 +1,30 @@
+ignoreGeneratedHeader = false
+severity = "error"
+confidence = 0.8
+errorCode = 1
+
+[rule.bool-literal-in-expr] # Using Boolean literals (true, false) in logic expressions may make the code less readable. This rule suggests removing Boolean literals from logic expressions.
+[rule.confusing-results] # Function or methods that return multiple, no named, values of the same type could induce error.
+[rule.constant-logical-expr] # The rule spots logical expressions that evaluate always to the same value.
+[rule.context-keys-type] # Basic types should not be used as a key in context.WithValue.
+[rule.dot-imports] # Importing with . makes the programs much harder to understand because it is unclear whether names belong to the current package or to an imported package.
+[rule.empty-block] # Empty blocks make code less readable and could be a symptom of a bug or unfinished refactoring.
+[rule.if-return] # Checking if an error is nil to just after return the error or nil is redundant.
+[rule.error-naming] # By convention, for the sake of readability, variables of type error must be named with the prefix err.
+[rule.error-return] # By convention, for the sake of readability, the errors should be last in the list of returned values by a function.
+[rule.errorf] # It is possible to get a simpler program by replacing errors.New(fmt.Sprintf()) with fmt.Errorf(). This rule spots that kind of simplification opportunities.
+[rule.get-return] # Typically, functions with names prefixed with Get are supposed to return a value.
+[rule.indent-error-flow] # To improve the readability of code, it is recommended to reduce the indentation as much as possible. This rule highlights redundant else-blocks that can be eliminated from the code.
+[rule.modifies-parameter] # A function that modifies its parameters can be hard to understand. It can also be misleading if the arguments are passed by value by the caller. This rule warns when a function modifies one or more of its parameters.
+[rule.modifies-value-receiver] # A method that modifies its receiver value can have undesired behavior. The modification can be also the root of a bug because the actual value receiver could be a copy of that used at the calling site. This rule warns when a method modifies its receiver.
+[rule.range] # This rule suggests a shorter way of writing ranges that do not use the second value.
+[rule.receiver-naming] # By convention, receiver names in a method should reflect their identity.
+[rule.redefines-builtin-id] # Constant names like false, true, nil, function names like append, make, and basic type names like bool, and byte are not reserved words of the language; therefore the can be redefined. Even if possible, redefining these built in names can lead to bugs very difficult to detect.
+[rule.string-of-int] # explicit type conversion string(i) where i has an integer type other than rune might behave not as expected by the developer (e.g. string(42) is not "42"). This rule spot that kind of suspicious conversions.
+[rule.unexported-return] # This rule warns when an exported function or method returns a value of an un-exported type.
+[rule.unreachable-code] # This rule spots and proposes to remove unreachable code.
+[rule.unnecessary-stmt] # This rule suggests to remove redundant statements like a break at the end of a case block, for improving the code's readability.
+[rule.var-declaration] # This rule proposes simplifications of variable declarations.
+[rule.waitgroup-by-value] # Function parameters that are passed by value, are in fact a copy of the original argument. Passing a copy of a sync.WaitGroup is usually not what the developer wants to do. This rule warns when a sync.WaitGroup expected as a by-value parameter in a function or method.
+
+# https://github.com/mgechev/revive#available-rules

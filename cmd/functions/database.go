@@ -381,8 +381,8 @@ func listTables() {
 
 func dumpDatabase(params []string) {
 	cmd := flag.NewFlagSet("database-dump", flag.ExitOnError)
-	path := cmd.String("path", "", "Query to be executed")
-	database := cmd.String("database", "", "Query to be executed")
+	path := cmd.String("path", "", "Database path to be saved")
+	database := cmd.String("database", "", "Database name to be dumped")
 	if err := cmd.Parse(params); err != nil {
 		fmt.Printf("Error parsing arguments: %v\n", err)
 		return

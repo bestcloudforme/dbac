@@ -11,4 +11,5 @@ require (
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/JamesStewy/go-mysqldump v0.2.2 // indirect
+	github.com/habx/pg-commands v0.6.1 // indirect
 )

@@ -11,12 +11,20 @@ import (
 )
 
 var DbConnection *sql.DB
+var PostgresqlInfo struct {
+	Host     string
+	Port     int
+	DB       string
+	Username string
+	Password string
+}
 
 // NewConnection establishes a new PostgreSQL database connection
 func NewConnection(host string, port int, user, password, dbname string) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
+
 	if err != nil {
 		log.Fatalf("Failed to open database connection: %v", err)
 	}
@@ -24,6 +32,12 @@ func NewConnection(host string, port int, user, password, dbname string) {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
+
+	PostgresqlInfo.DB = dbname
+	PostgresqlInfo.Host = host
+	PostgresqlInfo.Port = port
+	PostgresqlInfo.Password = password
+	PostgresqlInfo.Username = user
 
 	DbConnection = db
 }

@@ -5,6 +5,7 @@ import (
 	"dbac/cmd/psql"
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 )
 
@@ -389,9 +390,16 @@ func dumpDatabase(params []string) {
 	if *database == "" {
 		*database = currentProfile.Database
 	}
+	if *path == "" {
+		fmt.Println("You should give a path parameter")
+		os.Exit(1)
+	}
 	switch currentProfile.DbType {
 	case "psql":
-		fmt.Println("Not supported yet")
+		dbPort, _ := strconv.Atoi(currentProfile.Port)
+		psql.NewConnection(currentProfile.Host, dbPort, currentProfile.User, currentProfile.Password, currentProfile.Database)
+		psql.Dump(*path, *database)
+		psql.Close()
 	case "mysql":
 		mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
 		mysql.Dump(*path, *database)

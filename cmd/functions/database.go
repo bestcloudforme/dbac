@@ -57,6 +57,9 @@ func Database(params []string) {
 	case "exec":
 		execQuery(params[2:])
 
+	case "dump":
+		dumpDatabase(params[2:])
+
 	case "-h":
 		printDatabaseHelp()
 
@@ -373,6 +376,28 @@ func listTables() {
 		mysql.ListTables()
 		mysql.Close()
 	}
+}
+
+func dumpDatabase(params []string) {
+	cmd := flag.NewFlagSet("database-dump", flag.ExitOnError)
+	path := cmd.String("path", "", "Query to be executed")
+	database := cmd.String("database", "", "Query to be executed")
+	if err := cmd.Parse(params); err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		return
+	}
+	if *database == "" {
+		*database = currentProfile.Database
+	}
+	switch currentProfile.DbType {
+	case "psql":
+		fmt.Println("Not supported yet")
+	case "mysql":
+		mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+		mysql.Dump(*path, *database)
+		mysql.Close()
+	}
+
 }
 
 func execQuery(params []string) {

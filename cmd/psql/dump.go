@@ -7,8 +7,7 @@ import (
 	pg "github.com/habx/pg-commands"
 )
 
-func Dump(path string, database string) {
-
+func Dump(path string, database string) error {
 	dump, err := pg.NewDump(&pg.Postgres{
 		Host:     PostgresqlInfo.Host,
 		Port:     PostgresqlInfo.Port,
@@ -17,19 +16,20 @@ func Dump(path string, database string) {
 		Password: PostgresqlInfo.Password,
 	})
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error creating dump object: %v\n", err)
+		return err
 	}
-	a := dump.GetFileName()
-	dump.SetFileName(path + "/" + a)
+
+	fileName := dump.GetFileName()
+	dump.SetFileName(path + "/" + fileName)
 
 	dump.EnableVerbose()
 	dumpExec := dump.Exec(pg.ExecOptions{StreamPrint: true, StreamDestination: os.Stdout})
 	if dumpExec.Error != nil {
-		fmt.Println(dumpExec.Error.Err)
-		fmt.Println(dumpExec.Output)
-
-	} else {
-		fmt.Println("Dump success")
-		fmt.Println(dumpExec.File)
+		fmt.Printf("Error during dump execution: %v\nOutput: %s\n", dumpExec.Error.Err, dumpExec.Output)
+		return dumpExec.Error.Err
 	}
+
+	fmt.Printf("Dump successful, file saved to: %s\n", dumpExec.File)
+	return nil
 }

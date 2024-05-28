@@ -6,24 +6,23 @@ import (
 	"github.com/JamesStewy/go-mysqldump"
 )
 
-func Dump(path string, database string) {
-
+func Dump(path string, database string) error {
 	dumpDir := path
 	dumpFilenameFormat := fmt.Sprintf("%s-20060102T150405", database)
 	dumper, err := mysqldump.Register(DbConnection, dumpDir, dumpFilenameFormat)
 	if err != nil {
-		fmt.Println("Error registering databse:", err)
-		return
+		fmt.Printf("Error registering database: %v\n", err)
+		return err
 	}
 
-	// Dump database to file
+	defer dumper.Close()
+
 	resultFilename, err := dumper.Dump()
 	if err != nil {
-		fmt.Println("Error dumping:", err)
-		return
+		fmt.Printf("Error dumping database: %v\n", err)
+		return err
 	}
-	fmt.Printf("File is saved to %s", resultFilename)
 
-	// Close dumper and connected database
-	dumper.Close()
+	fmt.Printf("Dump successful, file saved to: %s\n", resultFilename)
+	return nil
 }

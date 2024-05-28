@@ -5,7 +5,6 @@ import (
 	"dbac/cmd/psql"
 	"flag"
 	"fmt"
-	"os"
 	"strconv"
 )
 
@@ -381,31 +380,46 @@ func listTables() {
 
 func dumpDatabase(params []string) {
 	cmd := flag.NewFlagSet("database-dump", flag.ExitOnError)
-	path := cmd.String("path", "", "Database path to be saved")
-	database := cmd.String("database", "", "Database name to be dumped")
+	path := cmd.String("path", "", "Path where the database dump will be saved")
+	database := cmd.String("database", "", "Name of the database to be dumped")
 	if err := cmd.Parse(params); err != nil {
 		fmt.Printf("Error parsing arguments: %v\n", err)
 		return
 	}
+
 	if *database == "" {
 		*database = currentProfile.Database
 	}
+
 	if *path == "" {
-		fmt.Println("You should give a path parameter")
-		os.Exit(1)
+		*path = "./"
 	}
+
+	var err error
 	switch currentProfile.DbType {
 	case "psql":
 		dbPort, _ := strconv.Atoi(currentProfile.Port)
 		psql.NewConnection(currentProfile.Host, dbPort, currentProfile.User, currentProfile.Password, currentProfile.Database)
-		psql.Dump(*path, *database)
-		psql.Close()
+		defer psql.Close()
+		err = psql.Dump(*path, *database)
+		if err != nil {
+			fmt.Printf("Error dumping PostgreSQL database: %v\n", err)
+		}
 	case "mysql":
 		mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-		mysql.Dump(*path, *database)
-		mysql.Close()
+		defer mysql.Close()
+		err = mysql.Dump(*path, *database)
+		if err != nil {
+			fmt.Printf("Error dumping MySQL database: %v\n", err)
+		}
+	default:
+		fmt.Printf("Unsupported database type: %s\n", currentProfile.DbType)
+		return
 	}
 
+	if err == nil {
+		fmt.Println("Database dump was successful.")
+	}
 }
 
 func execQuery(params []string) {
@@ -466,4 +480,5 @@ func printDatabaseHelp() {
 	fmt.Println("  dbac database revoke-database --username [USERNAME] --permission [PERMISSION] --database [DATABASE]")
 	fmt.Println("  dbac database revoke-table --username [USERNAME] --permission [PERMISSION] --table [TABLE]")
 	fmt.Println("  dbac database exec --query [QUERY] or --file [FILE]")
+	fmt.Println("  dbac database dump --path [PATH] --database [DATABASE]")
 }

@@ -382,6 +382,9 @@ func dumpDatabase(params []string) {
 	cmd := flag.NewFlagSet("database-dump", flag.ExitOnError)
 	path := cmd.String("path", "", "Path where the database dump will be saved")
 	database := cmd.String("database", "", "Name of the database to be dumped")
+	table := cmd.String("table", "", "Name of the database to be dumped")
+	filename := cmd.String("filename", "", "Name of the database to be dumped")
+	allTables := cmd.Bool("allTables", false, "Name of the database to be dumped")
 	if err := cmd.Parse(params); err != nil {
 		fmt.Printf("Error parsing arguments: %v\n", err)
 		return
@@ -395,20 +398,25 @@ func dumpDatabase(params []string) {
 		*path = "./"
 	}
 
+	if *filename == "" {
+		*filename = *database + ".sql"
+	}
+
 	var err error
 	switch currentProfile.DbType {
 	case "psql":
 		dbPort, _ := strconv.Atoi(currentProfile.Port)
 		psql.NewConnection(currentProfile.Host, dbPort, currentProfile.User, currentProfile.Password, currentProfile.Database)
 		defer psql.Close()
-		err = psql.Dump(*path, *database)
+		//err = psql.Dump(*path, *database)
+		err = psql.Dump2(*path, *database, *table, *allTables, *filename)
 		if err != nil {
 			fmt.Printf("Error dumping PostgreSQL database: %v\n", err)
 		}
 	case "mysql":
 		mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
 		defer mysql.Close()
-		err = mysql.Dump(*path, *database)
+		err = mysql.Dump(*path, *database, *filename, *table, *allTables)
 		if err != nil {
 			fmt.Printf("Error dumping MySQL database: %v\n", err)
 		}

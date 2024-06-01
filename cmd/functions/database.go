@@ -409,7 +409,7 @@ func dumpDatabase(params []string) {
 		psql.NewConnection(currentProfile.Host, dbPort, currentProfile.User, currentProfile.Password, currentProfile.Database)
 		defer psql.Close()
 		//err = psql.Dump(*path, *database)
-		err = psql.Dump2(*path, *database, *table, *allTables, *filename)
+		err = psql.Dump(*path, *database, *filename, *table, *allTables)
 		if err != nil {
 			fmt.Printf("Error dumping PostgreSQL database: %v\n", err)
 		}

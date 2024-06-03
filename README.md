@@ -59,7 +59,7 @@ The CLI tool provides various commands for managing databases, users, and permis
 - `dbac database list-tables`: List all tables in the current database.
 - `dbac database create-database --database [DATABASE]`: Create a new database.
 - `dbac database delete-database --database [DATABASE]`: Delete an existing database.
-- `dbac database dump --path [PATH] --database [DATABASE]`: Dump the specified database to the specified path.
+- `dbac database dump --filepath [FILEPATH] --table [TABLE] [--allTables] --database [DATABASE]`: Dump the specified database to the specified path.
 ### User Commands
 - `dbac database list-user`: List all users.
 - `dbac database create-user --username [USERNAME] --user-password [PASSWORD]`: Create a new database user.

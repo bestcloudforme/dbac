@@ -12,7 +12,6 @@ import (
 
 var DbConnection *sql.DB
 
-// NewConnection establishes a new database connection
 func NewConnection(host, port, user, password, dbname string) {
 	addr := fmt.Sprintf("%s:%s", host, port)
 
@@ -32,7 +31,6 @@ func NewConnection(host, port, user, password, dbname string) {
 	DbConnection = db
 }
 
-// Ping checks the database connection
 func Ping() {
 	if err := DbConnection.Ping(); err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
@@ -40,14 +38,12 @@ func Ping() {
 	fmt.Println("Connection Success")
 }
 
-// Close closes the database connection
 func Close() {
 	if err := DbConnection.Close(); err != nil {
 		log.Fatalf("Failed to close database connection: %v", err)
 	}
 }
 
-// Exec executes a given SQL query and prints the results
 func Exec(query string) {
 	rows, err := DbConnection.Query(query)
 	if err != nil {
@@ -84,7 +80,6 @@ func Exec(query string) {
 	fmt.Println("Query run successfully")
 }
 
-// FileExec executes SQL commands from a file
 func FileExec(filename string) {
 	file, err := os.ReadFile(filename)
 	if err != nil {

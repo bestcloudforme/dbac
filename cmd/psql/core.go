@@ -19,7 +19,6 @@ var PostgresqlInfo struct {
 	Password string
 }
 
-// NewConnection establishes a new PostgreSQL database connection
 func NewConnection(host string, port int, user, password, dbname string) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -42,7 +41,6 @@ func NewConnection(host string, port int, user, password, dbname string) {
 	DbConnection = db
 }
 
-// Ping checks the database connection
 func Ping() {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
@@ -53,7 +51,6 @@ func Ping() {
 	fmt.Println("Connection Success")
 }
 
-// Close closes the database connection
 func Close() {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
@@ -63,7 +60,6 @@ func Close() {
 	}
 }
 
-// Exec executes a given SQL query
 func Exec(query string) {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
@@ -74,7 +70,6 @@ func Exec(query string) {
 	fmt.Println("Query executed successfully")
 }
 
-// FileExec executes SQL commands from a file
 func FileExec(filename string) {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")

@@ -5,7 +5,6 @@ import (
 	"log"
 )
 
-// ListDatabases lists all databases in the PostgreSQL server
 func ListDatabases() {
 	query := "SELECT datname FROM pg_catalog.pg_database;"
 	rows, err := DbConnection.Query(query)
@@ -32,7 +31,6 @@ func ListDatabases() {
 	}
 }
 
-// ListTables lists all tables in the current PostgreSQL database
 func ListTables() {
 	query := "SELECT tablename FROM pg_catalog.pg_tables;"
 	rows, err := DbConnection.Query(query)
@@ -59,7 +57,6 @@ func ListTables() {
 	}
 }
 
-// CreateDatabase creates a new database in the PostgreSQL server
 func CreateDatabase(database string) {
 	query := fmt.Sprintf("CREATE DATABASE %s;", database)
 	if _, err := DbConnection.Exec(query); err != nil {
@@ -69,7 +66,6 @@ func CreateDatabase(database string) {
 	fmt.Println("Database created successfully")
 }
 
-// DeleteDatabase deletes a database from the PostgreSQL server
 func DeleteDatabase(database string) {
 	query := fmt.Sprintf("DROP DATABASE %s;", database)
 	if _, err := DbConnection.Exec(query); err != nil {

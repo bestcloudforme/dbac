@@ -11,12 +11,19 @@ import (
 )
 
 var DbConnection *sql.DB
+var PostgresqlInfo struct {
+	Host     string
+	Port     int
+	DB       string
+	Username string
+	Password string
+}
 
-// NewConnection establishes a new PostgreSQL database connection
 func NewConnection(host string, port int, user, password, dbname string) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
+
 	if err != nil {
 		log.Fatalf("Failed to open database connection: %v", err)
 	}
@@ -25,10 +32,15 @@ func NewConnection(host string, port int, user, password, dbname string) {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
 
+	PostgresqlInfo.DB = dbname
+	PostgresqlInfo.Host = host
+	PostgresqlInfo.Port = port
+	PostgresqlInfo.Password = password
+	PostgresqlInfo.Username = user
+
 	DbConnection = db
 }
 
-// Ping checks the database connection
 func Ping() {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
@@ -39,7 +51,6 @@ func Ping() {
 	fmt.Println("Connection Success")
 }
 
-// Close closes the database connection
 func Close() {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
@@ -49,7 +60,6 @@ func Close() {
 	}
 }
 
-// Exec executes a given SQL query
 func Exec(query string) {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")
@@ -60,7 +70,6 @@ func Exec(query string) {
 	fmt.Println("Query executed successfully")
 }
 
-// FileExec executes SQL commands from a file
 func FileExec(filename string) {
 	if DbConnection == nil {
 		log.Fatalf("No database connection established")

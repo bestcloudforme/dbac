@@ -11,34 +11,26 @@ var currentProfile helper.Profile
 
 func App(params []string, profile helper.Profile) {
 	currentProfile = profile
-
 	if len(params) < 1 {
 		printAppHelp()
 		return
 	}
-
 	switch params[0] {
 	case "batch":
 		Batch(params)
-
 	case "init":
 		Init(params)
-
 	case "profile":
 		Profile(params)
-
 	case "database":
 		Database(params)
-
 	case "-h":
 		printAppHelp()
-
 	default:
 		fmt.Println("Invalid command.")
 		printAppHelp()
 	}
 }
-
 func printAppHelp() {
 	fmt.Println("Available commands and options:")
 	fmt.Println("  dbac init - Initialize the CLI configuration.")
@@ -64,5 +56,6 @@ func printAppHelp() {
 	fmt.Println("    revoke-database --username [USERNAME] --permission [PERMISSION] --database [DATABASE] - Revoke database-level permissions from a user")
 	fmt.Println("    revoke-table --username [USERNAME] --permission [PERMISSION] --table [TABLE] - Revoke table-level permissions from a user")
 	fmt.Println("    exec --query [QUERY] or --file [FILE] - Execute a SQL query or SQL commands from a file")
+	fmt.Println("    dump --path [PATH] --database [DATABASE] - Dump the specified database to the specified path")
 	fmt.Println("  dbac batch --file=\"batch.yaml\" - Execute batch commands from a YAML file.")
 }

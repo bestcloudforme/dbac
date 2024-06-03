@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func Dump(path string, database string, filename string, table string, allTables bool) error {
-	file, err := os.Create(path + filename)
+func Dump(filePath string, database string, table string, allTables bool) error {
+	file, err := os.Create(filePath)
 	if err != nil {
 		log.Fatalf("Failed to create output file: %v", err)
 		return err

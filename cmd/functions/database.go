@@ -5,7 +5,9 @@ import (
 	"dbac/cmd/psql"
 	"flag"
 	"fmt"
+	"path/filepath"
 	"strconv"
+	"time"
 )
 
 func Database(params []string) {
@@ -380,27 +382,33 @@ func listTables() {
 
 func dumpDatabase(params []string) {
 	cmd := flag.NewFlagSet("database-dump", flag.ExitOnError)
-	path := cmd.String("path", "", "Path where the database dump will be saved")
+	filePath := cmd.String("filepath", "", "Full filepath for saving the database dump")
 	database := cmd.String("database", "", "Name of the database to be dumped")
-	table := cmd.String("table", "", "Name of the database to be dumped")
-	filename := cmd.String("filename", "", "Name of the database to be dumped")
-	allTables := cmd.Bool("allTables", false, "Name of the database to be dumped")
+	table := cmd.String("table", "", "Name of the table to be dumped")
+	allTables := cmd.Bool("allTables", false, "If true, dump all tables in the database")
+
 	if err := cmd.Parse(params); err != nil {
 		fmt.Printf("Error parsing arguments: %v\n", err)
 		return
 	}
 
+	if *filePath == "" {
+		timestamp := time.Now().Format("20060102-150405")
+		*filePath = fmt.Sprintf("./dump-%s.sql", timestamp)
+		fmt.Println("File path set to:", *filePath)
+	}
+
 	if *database == "" {
 		*database = currentProfile.Database
 	}
-
-	if *path == "" {
-		*path = "./"
+	dir, filename := filepath.Split(*filePath)
+	if filename == "" {
+		filename = *database + ".sql"
 	}
-
-	if *filename == "" {
-		*filename = *database + ".sql"
+	if dir == "" {
+		dir = "./"
 	}
+	fullPath := filepath.Join(dir, filename)
 
 	var err error
 	switch currentProfile.DbType {
@@ -409,14 +417,14 @@ func dumpDatabase(params []string) {
 		psql.NewConnection(currentProfile.Host, dbPort, currentProfile.User, currentProfile.Password, currentProfile.Database)
 		defer psql.Close()
 		//err = psql.Dump(*path, *database)
-		err = psql.Dump(*path, *database, *filename, *table, *allTables)
+		err = psql.Dump(fullPath, *database, *table, *allTables)
 		if err != nil {
 			fmt.Printf("Error dumping PostgreSQL database: %v\n", err)
 		}
 	case "mysql":
 		mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
 		defer mysql.Close()
-		err = mysql.Dump(*path, *database, *filename, *table, *allTables)
+		err = mysql.Dump(fullPath, *database, *table, *allTables)
 		if err != nil {
 			fmt.Printf("Error dumping MySQL database: %v\n", err)
 		}
@@ -488,5 +496,5 @@ func printDatabaseHelp() {
 	fmt.Println("  dbac database revoke-database --username [USERNAME] --permission [PERMISSION] --database [DATABASE]")
 	fmt.Println("  dbac database revoke-table --username [USERNAME] --permission [PERMISSION] --table [TABLE]")
 	fmt.Println("  dbac database exec --query [QUERY] or --file [FILE]")
-	fmt.Println("  dbac database dump --path [PATH] --database [DATABASE]")
+	fmt.Println("  dbac database dump --filepath [FILEPATH] --table [TABLE] [--allTables] --database [DATABASE]")
 }

@@ -1,6 +1,8 @@
 # dbac ([dee-BEK] the coffee) Database Command Line Interface (CLI) Documentation
 This document provides an overview of the functionalities provided by the Database Command Line Interface (CLI) tool, which supports interactions with MySQL and PostgreSQL databases. The CLI allows users to manage databases, users, and permissions through various commands.
+
 <img src="assets/dbac-logo.png" width="200">
+
 ## Table of Contents
 - [dbac (\[dee-BEK\] the coffee) Database Command Line Interface (CLI) Documentation](#dbac-dee-bek-the-coffee-database-command-line-interface-cli-documentation)
   - [Table of Contents](#table-of-contents)

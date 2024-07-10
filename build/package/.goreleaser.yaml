@@ -1,0 +1,61 @@
+---
+project_name: dbac
+
+env:
+  - CGO_ENABLED=0
+  - GO111MODULE=auto
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: binary
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    binary: dbac
+    ldflags:
+      - -s -w -X dbac/cmd.gitVersion={{ .Version }} -X dbac/cmd.gitCommit={{ .ShortCommit }} -X dbac/cmd.buildDate={{ .CommitDate }}
+    main: ./main.go
+
+archives:
+  - files:
+      - README.md
+      - LICENSE
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+release:
+  github:
+    owner: bestcloudforme
+    name: dbac
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^build:'
+      - '^style:'
+      - 'README'
+      - '^Merge branch'
+      - '^Merge pull request'
+
+brews:
+  - name: dbac
+    repository:
+      owner: bestcloudforme
+      name: homebrew-tap
+    directory: Formula
+    description: "A CLI tool for managing multiple databases, users, and permissions"
+    homepage: https://github.com/bestcloudforme/dbac
+    license: GPL-3.0
+    install: |
+      bin.install "dbac"
+      

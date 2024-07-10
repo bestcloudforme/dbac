@@ -1,0 +1,12 @@
+steps:
+  - type: create-user
+    description: Create a new database user
+    username: john_doe2
+    password: securepassword123
+
+  - type: grant-database
+    description: Grant all privileges
+    username: john_doe2
+    permission: ALL
+    database: test_db
+    profile: mysql-local

@@ -1,10 +1,12 @@
 package helper
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -50,63 +52,7 @@ func ReadProfile(profileName string) Profile {
 	return Profile{}
 }
 
-func AddProfile(dbtype, host, user, password, database, port, name string) {
-	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	newProfile := Profile{
-		DbType:   dbtype,
-		Host:     host,
-		User:     user,
-		Password: password,
-		Database: database,
-		Port:     port,
-		Name:     name,
-	}
-
-	var allProfiles Profiles
-
-	// Check if the profile file exists
-	if _, err := os.Stat(profilePath); os.IsNotExist(err) {
-		allProfiles = Profiles{
-			Profiles: []Profile{newProfile},
-			Current:  name,
-		}
-	} else {
-		data, err := os.ReadFile(profilePath)
-		if err != nil {
-			log.Fatalf("Failed to read profile file: %v", err)
-		}
-		if len(data) == 0 {
-			allProfiles = Profiles{
-				Profiles: []Profile{},
-				Current:  "",
-			}
-		} else {
-			if err := json.Unmarshal(data, &allProfiles); err != nil {
-				log.Fatalf("Failed to unmarshal profiles: %v", err)
-			}
-		}
-
-		// Check if the profile name already exists
-		for _, profile := range allProfiles.Profiles {
-			if profile.Name == name {
-				fmt.Printf("Profile name '%s' already exists.\n", name)
-				return
-			}
-		}
-
-		allProfiles.Profiles = append(allProfiles.Profiles, newProfile)
-		allProfiles.Current = name
-	}
-
-	if err := writeProfilesToFile(allProfiles, profilePath); err != nil {
-		log.Fatalf("Failed to write profile file: %v", err)
-	}
-
-	fmt.Println("Profile added successfully")
-}
-
-// Utility function to write profiles to file
-func writeProfilesToFile(profiles Profiles, filePath string) error {
+func WriteProfilesToFile(profiles Profiles, filePath string) error {
 	jsonData, err := json.MarshalIndent(profiles, "", "    ")
 	if err != nil {
 		return err
@@ -114,183 +60,39 @@ func writeProfilesToFile(profiles Profiles, filePath string) error {
 	return os.WriteFile(filePath, jsonData, 0644)
 }
 
-func AddFileProfile(file string) {
+func AddFileProfile(file string) (string, error) {
 	var newProfile Profile
-	var allProfiles Profiles
-
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
-		log.Fatalf("Failed to read YAML file: %v", err)
+		return "", fmt.Errorf("failed to read YAML file: %v", err)
 	}
 
 	if err := yaml.Unmarshal(yamlFile, &newProfile); err != nil {
-		log.Fatalf("Failed to unmarshal YAML file: %v", err)
+		return "", fmt.Errorf("failed to unmarshal YAML file: %v", err)
 	}
 
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	if _, err := os.Stat(profilePath); os.IsNotExist(err) {
-		allProfiles = Profiles{
-			Profiles: []Profile{newProfile},
-			Current:  newProfile.Name,
-		}
-	} else {
-		data, err := os.ReadFile(profilePath)
-		if err != nil {
-			log.Fatalf("Failed to read profile file: %v", err)
-		}
+	var allProfiles Profiles
+	if data, err := os.ReadFile(profilePath); err == nil {
 		if err := json.Unmarshal(data, &allProfiles); err != nil {
-			log.Fatalf("Failed to unmarshal profile file: %v", err)
+			return "", fmt.Errorf("failed to unmarshal profile file: %v", err)
 		}
-
-		for _, profile := range allProfiles.Profiles {
-			if profile.Name == newProfile.Name {
-				fmt.Printf("Profile name '%s' already exists.\n", newProfile.Name)
-				return
-			}
-		}
-
-		allProfiles.Profiles = append(allProfiles.Profiles, newProfile)
-		allProfiles.Current = newProfile.Name
-	}
-
-	if err := writeProfilesToFile(allProfiles, profilePath); err != nil {
-		log.Fatalf("Failed to write profile file: %v", err)
-	}
-
-	fmt.Println("Profile added successfully")
-}
-
-func DeleteProfile(name string) {
-	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	var allProfiles Profiles
-
-	data, err := os.ReadFile(profilePath)
-	if err != nil {
-		log.Fatalf("Failed to read profile file: %v", err)
-	}
-	if err := json.Unmarshal(data, &allProfiles); err != nil {
-		log.Fatalf("Failed to unmarshal profiles: %v", err)
-	}
-
-	// Filter out the profile to be deleted
-	var newProfiles Profiles
-	profileFound := false
-	for _, profile := range allProfiles.Profiles {
-		if profile.Name != name {
-			newProfiles.Profiles = append(newProfiles.Profiles, profile)
-		} else {
-			profileFound = true
-		}
-	}
-
-	if !profileFound {
-		fmt.Printf("Profile '%s' not found.\n", name)
-		return
-	}
-
-	// Update the current profile if the deleted profile was the current one
-	if allProfiles.Current == name {
-		if len(newProfiles.Profiles) > 0 {
-			newProfiles.Current = newProfiles.Profiles[0].Name
-		} else {
-			newProfiles.Current = ""
-		}
-	} else {
-		newProfiles.Current = allProfiles.Current
-	}
-
-	if len(newProfiles.Profiles) == 0 {
-		// Delete the profile file if no profiles remain
-		if err := os.Remove(profilePath); err != nil {
-			log.Fatalf("Failed to delete profile file: %v", err)
-		}
-		fmt.Println("All profiles deleted and profile file removed.")
-	} else {
-		if err := writeProfilesToFile(newProfiles, profilePath); err != nil {
-			log.Fatalf("Failed to write profile file: %v", err)
-		}
-		fmt.Printf("Profile '%s' deleted successfully.\n", name)
-	}
-}
-
-func ListProfiles() {
-	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	data, err := os.ReadFile(profilePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			fmt.Println("No profiles found.")
-			return
-		}
-		log.Fatalf("Failed to read profile file: %v", err)
-	}
-
-	var allProfiles Profiles
-	if err := json.Unmarshal(data, &allProfiles); err != nil {
-		log.Fatalf("Failed to unmarshal profiles: %v", err)
-	}
-
-	if len(allProfiles.Profiles) == 0 {
-		fmt.Println("No profiles found.")
-		return
 	}
 
 	for _, profile := range allProfiles.Profiles {
-		if profile.Name == allProfiles.Current {
-			fmt.Printf("* %s\n", profile.Name)
-		} else {
-			fmt.Printf("  %s\n", profile.Name)
-		}
-	}
-}
-
-func SwitchProfile(profilename string) {
-	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
-	data, err := os.ReadFile(profilePath)
-	if err != nil {
-		log.Fatalf("Failed to read profile file: %v", err)
-	}
-
-	var allProfiles Profiles
-	if err := json.Unmarshal(data, &allProfiles); err != nil {
-		log.Fatalf("Failed to unmarshal profiles: %v", err)
-	}
-
-	// Check if the profile exists
-	profileExists := false
-	for _, profile := range allProfiles.Profiles {
-		if profile.Name == profilename {
-			profileExists = true
-			break
+		if profile.Name == newProfile.Name {
+			return newProfile.Name, fmt.Errorf("profile name '%s' already exists", newProfile.Name)
 		}
 	}
 
-	if !profileExists {
-		fmt.Printf("Profile '%s' does not exist.\n", profilename)
-		return
+	allProfiles.Profiles = append(allProfiles.Profiles, newProfile)
+	allProfiles.Current = newProfile.Name
+
+	if err := WriteProfilesToFile(allProfiles, profilePath); err != nil {
+		return newProfile.Name, fmt.Errorf("failed to write profile file: %v", err)
 	}
 
-	// Set the current profile
-	allProfiles.Current = profilename
-
-	// Write the updated profiles back to the file
-	if err := writeProfilesToFile(allProfiles, profilePath); err != nil {
-		log.Fatalf("Failed to write profile file: %v", err)
-	}
-
-	fmt.Printf("Switched to profile '%s' successfully.\n", profilename)
-}
-
-func CreateProfileFile() {
-	profile := collectProfileData()
-
-	var newProfiles Profiles
-	newProfiles.Current = profile.Name
-	newProfiles.Profiles = append(newProfiles.Profiles, profile)
-
-	if err := writeProfilesToFile(newProfiles, os.Getenv("HOME")+"/.dbac-profiles.json"); err != nil {
-		log.Fatalf("Failed to write profile file: %v", err)
-	}
-	fmt.Println("Profile created successfully")
+	return newProfile.Name, nil
 }
 
 func InitProfile() {
@@ -313,7 +115,7 @@ func InitProfile() {
 
 		for _, p := range allProfiles.Profiles {
 			if p.Name == profile.Name {
-				fmt.Printf("Profile name '%s' already exists.\n", profile.Name)
+				log.Fatalf("Profile name '%s' already exists.\n", profile.Name)
 				return
 			}
 		}
@@ -321,7 +123,7 @@ func InitProfile() {
 		allProfiles.Profiles = append(allProfiles.Profiles, profile)
 	}
 
-	if err := writeProfilesToFile(allProfiles, profilePath); err != nil {
+	if err := WriteProfilesToFile(allProfiles, profilePath); err != nil {
 		log.Fatalf("Failed to write profile file: %v", err)
 	}
 
@@ -329,71 +131,82 @@ func InitProfile() {
 }
 
 func collectProfileData() Profile {
+	reader := bufio.NewReader(os.Stdin)
 	var profile Profile
 	var dbtype, defaultPort string
 	var err error
 
 	for {
-		fmt.Println("Database Type (Choices: mysql, psql)")
+		fmt.Println("[1/7] Database Type (Choices: mysql, psql):")
 		fmt.Print("-> ")
-		if _, err = fmt.Scan(&dbtype); err != nil {
+		dbtype, err = reader.ReadString('\n')
+		if err != nil {
 			log.Fatalf("Failed to read input: %v", err)
 		}
+		dbtype = strings.TrimSpace(dbtype)
+
 		if dbtype == "mysql" || dbtype == "psql" {
 			profile.DbType = dbtype
 			break
+		} else {
+			fmt.Println("Invalid choice. Please enter 'mysql' or 'psql'.")
 		}
-		fmt.Println("Invalid choice. Please enter 'mysql' or 'psql'.")
 	}
 
-	if dbtype == "mysql" {
-		defaultPort = "3306"
-	} else if dbtype == "psql" {
-		defaultPort = "5432"
+	defaultPort = map[string]string{"mysql": "3306", "psql": "5432"}[dbtype]
+
+	readRequiredField := func(prompt string) string {
+		var input string
+		for {
+			fmt.Println(prompt)
+			fmt.Print("-> ")
+			input, err = reader.ReadString('\n')
+			if err != nil {
+				log.Fatalf("Failed to read input: %v", err)
+			}
+			input = strings.TrimSpace(input)
+			if input == "" {
+				fmt.Println("This field cannot be empty. Please enter a valid value.")
+			} else {
+				break
+			}
+		}
+		return input
 	}
 
-	fmt.Println("--------")
-	fmt.Println("Database Host Address (e.g., localhost, 10.0.0.10, mydatabase.example.com)")
-	fmt.Print("-> ")
-	if _, err = fmt.Scan(&profile.Host); err != nil {
+	profile.Host = readRequiredField("[2/7] Database Host Address (e.g., localhost, 10.0.0.10, mydatabase.example.com)")
+	profile.User = readRequiredField("[3/7] Database Username")
+	profile.Password = readRequiredField("[4/7] Database Password")
+	profile.Database = readRequiredField("[5/7] Database Name to Connect (e.g., postgres, mysql, testdb)")
+
+	fmt.Printf("[6/7] Database Port (Default: %s for %s):\n-> ", defaultPort, dbtype)
+	if profile.Port, err = reader.ReadString('\n'); err != nil {
 		log.Fatalf("Failed to read input: %v", err)
 	}
-
-	fmt.Println("--------")
-	fmt.Println("Database Username")
-	fmt.Print("-> ")
-	if _, err = fmt.Scan(&profile.User); err != nil {
-		log.Fatalf("Failed to read input: %v", err)
-	}
-
-	fmt.Println("--------")
-	fmt.Println("Database Password")
-	fmt.Print("-> ")
-	if _, err = fmt.Scan(&profile.Password); err != nil {
-		log.Fatalf("Failed to read input: %v", err)
-	}
-
-	fmt.Println("--------")
-	fmt.Printf("Database Name to Connect (e.g., postgres, mysql, testdb)\n-> ")
-	if _, err = fmt.Scan(&profile.Database); err != nil {
-		log.Fatalf("Failed to read input: %v", err)
-	}
-
-	fmt.Println("--------")
-	fmt.Printf("Database Port (Default: %s for %s)\n-> ", defaultPort, dbtype)
-	if _, err = fmt.Scan(&profile.Port); err != nil {
-		log.Fatalf("Failed to read input: %v", err)
-	}
+	profile.Port = strings.TrimSpace(profile.Port)
 	if profile.Port == "" {
 		profile.Port = defaultPort
 	}
-
-	fmt.Println("--------")
-	fmt.Println("Profile Name (how you will refer to this profile in CLI)")
-	fmt.Print("-> ")
-	if _, err = fmt.Scan(&profile.Name); err != nil {
-		log.Fatalf("Failed to read input: %v", err)
-	}
+	profile.Name = readRequiredField("[7/7] Profile Name (how you will refer to this profile in CLI)")
 
 	return profile
+}
+
+func GetCurrentProfileName() (string, error) {
+	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
+	data, err := os.ReadFile(profilePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read the profile file: %v", err)
+	}
+
+	var profiles Profiles
+	if err := json.Unmarshal(data, &profiles); err != nil {
+		return "", fmt.Errorf("failed to unmarshal profiles: %v", err)
+	}
+
+	if profiles.Current == "" {
+		return "", fmt.Errorf("no current profile set")
+	}
+
+	return profiles.Current, nil
 }

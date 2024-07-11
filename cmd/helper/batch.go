@@ -200,7 +200,13 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -225,7 +231,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -250,7 +261,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -274,7 +290,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -298,7 +319,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -322,7 +348,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -346,7 +377,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -370,7 +406,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 		if stepper.Steps[step].File == "" {
 			if currentProfile.DbType == "psql" {
 				db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -407,7 +448,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -431,7 +477,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -455,7 +506,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -478,7 +534,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
@@ -501,7 +562,12 @@ func App(param string, step int, file string) {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-		currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		if stepper.Steps[step].Profile == "" {
+			currentProfileName, _ := GetCurrentProfileName()
+			currentProfile = ReadProfile(currentProfileName)
+		} else {
+			currentProfile = ReadProfile(stepper.Steps[step].Profile)
+		}
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)

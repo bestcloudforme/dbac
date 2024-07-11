@@ -1,0 +1,7 @@
+db-type: "postgres"
+host: "localhost"
+user: "admin"
+password: "secret"
+database: "mydb"
+port: "5432"
+name: "myprofile2"

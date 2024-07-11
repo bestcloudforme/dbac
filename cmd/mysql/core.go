@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -16,11 +17,12 @@ func NewConnection(host, port, user, password, dbname string) {
 	addr := fmt.Sprintf("%s:%s", host, port)
 
 	cfg := mysql.Config{
-		User:   user,
-		Passwd: password,
-		Net:    "tcp",
-		Addr:   addr,
-		DBName: dbname,
+		User:    user,
+		Passwd:  password,
+		Net:     "tcp",
+		Addr:    addr,
+		DBName:  dbname,
+		Timeout: 10 * time.Second,
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())

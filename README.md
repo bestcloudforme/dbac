@@ -24,12 +24,18 @@ This document provides an overview of the functionalities provided by the Databa
     - [PostgreSQL Functions](#postgresql-functions)
   - [Contributing](#contributing)
   - [License](#license)
-## Installation - Build from Source
+## Installation
+### Homebrew
+You can install dbac using Homebrew:
+```sh
+brew install bestcloudforme/homebrew-tap/dbac
+```
+### Build from Source
 To build the CLI tool from source, you will need to have `go` installed on your machine. The source code also uses `make` to simplify the build and installation process.
-### Prerequisites
+#### Prerequisites
 - Install [Go](https://golang.org/dl/) (version 1.14 or higher)
 - Install [Make](https://www.gnu.org/software/make/)
-### Build Instructions
+#### Build Instructions
 1. Clone the repository:
 ```bash
 git clone https://github.com/bestcloudforme/dbac.git

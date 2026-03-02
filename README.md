@@ -111,23 +111,23 @@ This batch system simplifies complex database operations, ensuring they are exec
 ## Examples
 1. **Ping a database**:
 ```bash
-dbac database ping
+dbac db ping
 ```
 2. **List all databases**:
 ```bash
-dbac database list-databases
+dbac db list-databases
 ```
 3. **Create a new database**:
 ```bash
-dbac database create-database --database testdb
+dbac db create-database --database testdb
 ```
 4. **Create a new user**:
 ```bash
-dbac database create-user --username testuser --user-password testpass
+dbac db create-user --username testuser --user-password testpass
 ```
 5. **Grant permissions to a user**:
 ```bash
-dbac database grant-database --username testuser --permission ALL PRIVILEGES --database testdb
+dbac db grant-database --username testuser --permission ALL PRIVILEGES --database testdb
 ```
 6. **Batch operations**:
 ```bash

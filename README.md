@@ -123,7 +123,7 @@ dbac db create-database --database testdb
 ```
 4. **Create a new user**:
 ```bash
-dbac db create-user --username testuser --user-password testpass
+dbac db create-user --username testuser --password testpass
 ```
 5. **Grant permissions to a user**:
 ```bash

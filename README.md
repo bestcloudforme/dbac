@@ -127,7 +127,7 @@ dbac db create-user --username testuser --password testpass
 ```
 5. **Grant permissions to a user**:
 ```bash
-dbac db grant-database --username testuser --permission ALL PRIVILEGES --database testdb
+dbac db grant-database --username testuser --permission ALL --database testdb
 ```
 6. **Batch operations**:
 ```bash

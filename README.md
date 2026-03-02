@@ -62,12 +62,12 @@ The CLI tool provides various commands for managing databases, users, and permis
 - `dbac profile add --file [FILE]`: Add a new profile from a file.
 - `dbac profile delete --profile-name [PROFILE-NAME]`: Delete a specified profile.
 ### Database Commands
-- `dbac database ping`: Ping the current database to check the connection.
-- `dbac database list-databases`: List all databases.
-- `dbac database list-tables`: List all tables in the current database.
-- `dbac database create-database --database [DATABASE]`: Create a new database.
-- `dbac database delete-database --database [DATABASE]`: Delete an existing database.
-- `dbac database dump --filepath [FILEPATH] --table [TABLE] [--allTables] --database [DATABASE]`: Dump the specified database to the specified path.
+- `dbac db ping`: Ping the current database to check the connection.
+- `dbac db list-databases`: List all databases.
+- `dbac db list-tables`: List all tables in the current database.
+- `dbac db create-database --database [DATABASE]`: Create a new database.
+- `dbac db delete-database --database [DATABASE]`: Delete an existing database.
+- `dbac db dump --filepath [FILEPATH] --table [TABLE] [--allTables] --database [DATABASE]`: Dump the specified database to the specified path.
 ### User Commands
 - `dbac database list-user`: List all users.
 - `dbac database create-user --username [USERNAME] --user-password [PASSWORD]`: Create a new database user.

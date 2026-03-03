@@ -62,12 +62,12 @@ The CLI tool provides various commands for managing databases, users, and permis
 - `dbac profile add --file [FILE]`: Add a new profile from a file.
 - `dbac profile delete --profile-name [PROFILE-NAME]`: Delete a specified profile.
 ### Database Commands
-- `dbac database ping`: Ping the current database to check the connection.
-- `dbac database list-databases`: List all databases.
-- `dbac database list-tables`: List all tables in the current database.
-- `dbac database create-database --database [DATABASE]`: Create a new database.
-- `dbac database delete-database --database [DATABASE]`: Delete an existing database.
-- `dbac database dump --filepath [FILEPATH] --table [TABLE] [--allTables] --database [DATABASE]`: Dump the specified database to the specified path.
+- `dbac db ping`: Ping the current database to check the connection.
+- `dbac db list-databases`: List all databases.
+- `dbac db list-tables`: List all tables in the current database.
+- `dbac db create-database --database [DATABASE]`: Create a new database.
+- `dbac db delete-database --database [DATABASE]`: Delete an existing database.
+- `dbac db dump --filepath [FILEPATH] --table [TABLE] [--allTables] --database [DATABASE]`: Dump the specified database to the specified path.
 ### User Commands
 - `dbac database list-user`: List all users.
 - `dbac database create-user --username [USERNAME] --user-password [PASSWORD]`: Create a new database user.
@@ -111,23 +111,23 @@ This batch system simplifies complex database operations, ensuring they are exec
 ## Examples
 1. **Ping a database**:
 ```bash
-dbac database ping
+dbac db ping
 ```
 2. **List all databases**:
 ```bash
-dbac database list-databases
+dbac db list-databases
 ```
 3. **Create a new database**:
 ```bash
-dbac database create-database --database testdb
+dbac db create-database --database testdb
 ```
 4. **Create a new user**:
 ```bash
-dbac database create-user --username testuser --user-password testpass
+dbac db create-user --username testuser --password testpass
 ```
 5. **Grant permissions to a user**:
 ```bash
-dbac database grant-database --username testuser --permission ALL PRIVILEGES --database testdb
+dbac db grant-database --username testuser --permission ALL --database testdb
 ```
 6. **Batch operations**:
 ```bash

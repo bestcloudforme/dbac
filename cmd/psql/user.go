@@ -32,7 +32,7 @@ func ListUsers() {
 }
 
 func CreateUser(username, password string) {
-	query := fmt.Sprintf("CREATE USER %s WITH PASSWORD '%s';", username, password)
+	query := "CREATE USER " + quoteIdentifier(username) + " WITH PASSWORD " + quoteLiteral(password) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("User couldn't be created: %v", err)
 		return
@@ -41,7 +41,7 @@ func CreateUser(username, password string) {
 }
 
 func DeleteUser(username string) {
-	query := fmt.Sprintf("DROP USER %s;", username)
+	query := "DROP USER " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("User couldn't be deleted: %v", err)
 		return
@@ -50,7 +50,7 @@ func DeleteUser(username string) {
 }
 
 func ChangeUserPassword(username, newPassword string) {
-	query := fmt.Sprintf("ALTER USER %s WITH PASSWORD '%s';", username, newPassword)
+	query := "ALTER USER " + quoteIdentifier(username) + " WITH PASSWORD " + quoteLiteral(newPassword) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Password couldn't be changed: %v", err)
 		return

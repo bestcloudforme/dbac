@@ -58,8 +58,7 @@ func ListTables() {
 }
 
 func CreateDatabase(database string) {
-	query := fmt.Sprintf("CREATE DATABASE %s;", database)
-	_, err := DbConnection.Exec(query)
+	_, err := DbConnection.Exec("CREATE DATABASE " + quoteIdentifier(database) + ";")
 	if err != nil {
 		log.Printf("Database couldn't be created: %v", err)
 		return
@@ -68,8 +67,7 @@ func CreateDatabase(database string) {
 }
 
 func DeleteDatabase(database string) {
-	query := fmt.Sprintf("DROP DATABASE %s;", database)
-	_, err := DbConnection.Exec(query)
+	_, err := DbConnection.Exec("DROP DATABASE " + quoteIdentifier(database) + ";")
 	if err != nil {
 		log.Printf("Database couldn't be deleted: %v", err)
 		return

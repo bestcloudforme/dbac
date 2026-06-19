@@ -101,3 +101,22 @@ func FileExec(filename string) {
 	}
 	fmt.Println("SQL file run successfully")
 }
+
+func quoteIdentifier(name string) string {
+	return "`" + strings.ReplaceAll(name, "`", "``") + "`"
+}
+
+func quoteLiteral(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `'`, `\'`)
+	return "'" + s + "'"
+}
+
+func validatePermissions(permissions string) string {
+	for _, r := range permissions {
+		if !((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == ' ' || r == ',' || r == '_') {
+			log.Fatalf("invalid permissions: %q", permissions)
+		}
+	}
+	return permissions
+}

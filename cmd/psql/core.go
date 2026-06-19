@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	_ "github.com/lib/pq"
+	pq "github.com/lib/pq"
 )
 
 var DbConnection *sql.DB
@@ -77,4 +77,16 @@ func FileExec(filename string) {
 		}
 	}
 	fmt.Println("SQL file executed successfully")
+}
+
+func quoteIdentifier(name string) string { return pq.QuoteIdentifier(name) }
+func quoteLiteral(s string) string       { return pq.QuoteLiteral(s) }
+
+func validatePermissions(permissions string) string {
+	for _, r := range permissions {
+		if !((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == ' ' || r == ',' || r == '_') {
+			log.Fatalf("invalid permissions: %q", permissions)
+		}
+	}
+	return permissions
 }

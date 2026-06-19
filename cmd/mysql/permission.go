@@ -6,7 +6,7 @@ import (
 )
 
 func GrantPermissions(database, username, permissions string) {
-	query := fmt.Sprintf("GRANT %s ON %s.* TO '%s'@'%%';", permissions, database, username)
+	query := "GRANT " + validatePermissions(permissions) + " ON " + quoteIdentifier(database) + ".* TO " + quoteLiteral(username) + "@'%';"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be added: %v", err)
 		return
@@ -15,7 +15,7 @@ func GrantPermissions(database, username, permissions string) {
 }
 
 func RevokePermissions(database, username, permissions string) {
-	query := fmt.Sprintf("REVOKE %s ON %s.* FROM '%s'@'%%';", permissions, database, username)
+	query := "REVOKE " + validatePermissions(permissions) + " ON " + quoteIdentifier(database) + ".* FROM " + quoteLiteral(username) + "@'%';"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be revoked: %v", err)
 		return
@@ -24,7 +24,7 @@ func RevokePermissions(database, username, permissions string) {
 }
 
 func GrantTablePermissions(database, table, username, permissions string) {
-	query := fmt.Sprintf("GRANT %s ON %s.%s TO '%s'@'%%';", permissions, database, table, username)
+	query := "GRANT " + validatePermissions(permissions) + " ON " + quoteIdentifier(database) + "." + quoteIdentifier(table) + " TO " + quoteLiteral(username) + "@'%';"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be added: %v", err)
 		return
@@ -33,7 +33,7 @@ func GrantTablePermissions(database, table, username, permissions string) {
 }
 
 func RevokeTablePermissions(database, table, username, permissions string) {
-	query := fmt.Sprintf("REVOKE %s ON %s.%s FROM '%s'@'%%';", permissions, database, table, username)
+	query := "REVOKE " + validatePermissions(permissions) + " ON " + quoteIdentifier(database) + "." + quoteIdentifier(table) + " FROM " + quoteLiteral(username) + "@'%';"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be revoked: %v", err)
 		return

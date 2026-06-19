@@ -57,7 +57,7 @@ func WriteProfilesToFile(profiles Profiles, filePath string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filePath, jsonData, 0644)
+	return os.WriteFile(filePath, jsonData, 0600)
 }
 
 func AddFileProfile(file string) (string, error) {

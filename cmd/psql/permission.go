@@ -6,7 +6,7 @@ import (
 )
 
 func GrantPermissions(database, username, permissions string) {
-	query := fmt.Sprintf("GRANT %s ON DATABASE %s TO %s;", permissions, database, username)
+	query := "GRANT " + validatePermissions(permissions) + " ON DATABASE " + quoteIdentifier(database) + " TO " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be added: %v", err)
 		return
@@ -15,7 +15,7 @@ func GrantPermissions(database, username, permissions string) {
 }
 
 func RevokePermissions(database, username, permissions string) {
-	query := fmt.Sprintf("REVOKE %s ON DATABASE %s FROM %s;", permissions, database, username)
+	query := "REVOKE " + validatePermissions(permissions) + " ON DATABASE " + quoteIdentifier(database) + " FROM " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be revoked: %v", err)
 		return
@@ -24,7 +24,7 @@ func RevokePermissions(database, username, permissions string) {
 }
 
 func GrantTablePermissions(table, username, permissions string) {
-	query := fmt.Sprintf("GRANT %s ON %s TO %s;", permissions, table, username)
+	query := "GRANT " + validatePermissions(permissions) + " ON " + quoteIdentifier(table) + " TO " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be added: %v", err)
 		return
@@ -33,7 +33,7 @@ func GrantTablePermissions(table, username, permissions string) {
 }
 
 func RevokeTablePermissions(table, username, permissions string) {
-	query := fmt.Sprintf("REVOKE %s ON %s FROM %s;", permissions, table, username)
+	query := "REVOKE " + validatePermissions(permissions) + " ON " + quoteIdentifier(table) + " FROM " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
 		log.Printf("Permission couldn't be revoked: %v", err)
 		return

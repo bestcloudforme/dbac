@@ -31,7 +31,7 @@ func runListDatabases(cmd *cobra.Command, args []string) {
 	}
 	profile := helper.ReadProfile(currentProfileName)
 	switch profile.DbType {
-	case "postgres":
+	case "psql":
 		dbPort, _ := strconv.Atoi(profile.Port)
 		psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database)
 		psql.ListDatabases()

@@ -49,7 +49,7 @@ func runExecCommand(cmd *cobra.Command, args []string) {
 	profile := helper.ReadProfile(currentProfileName)
 	if file != "" {
 		switch profile.DbType {
-		case "postgres":
+		case "psql":
 			dbPort, _ := strconv.Atoi(profile.Port)
 			psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database)
 			psql.FileExec(file)
@@ -61,7 +61,7 @@ func runExecCommand(cmd *cobra.Command, args []string) {
 		}
 	} else {
 		switch profile.DbType {
-		case "postgres":
+		case "psql":
 			dbPort, _ := strconv.Atoi(profile.Port)
 			psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database)
 			psql.Exec(query)

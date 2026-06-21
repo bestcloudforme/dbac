@@ -6,7 +6,7 @@ GOLANGCI_LINT_VERSION := latest
 REVIVE_VERSION := v1.3.7
 
 .PHONY: all
-all: clean tools lint build
+all: clean tools lint test build
 	@echo " # Completed all steps."
 
 .PHONY: clean
@@ -75,6 +75,12 @@ vendor: tidy
 	@echo " # Vendoring dependencies..."
 	@go mod vendor
 	@echo " # Vendoring complete."
+
+.PHONY: test
+test: vendor
+	@echo " # Running tests..."
+	@go test -race -cover ./... || (echo "Tests failed, exiting!"; sh -c 'exit 1';)
+	@echo " # Tests complete."
 
 .PHONY: build
 build: vendor

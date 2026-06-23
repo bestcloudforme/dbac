@@ -35,9 +35,7 @@ func currentProfiles(cmd *cobra.Command, args []string) {
 	fmt.Printf("Host:        %s\n", profile.Host)
 	fmt.Printf("Port:        %s\n", profile.Port)
 	fmt.Printf("User:        %s\n", profile.User)
-	// Commenting out password for security reasons, it shouldn't be printed
-	// fmt.Printf("Password:    %s\n", profile.Password)
-	fmt.Printf("Password:    %s\n", "getItOnProfileJson")
+	fmt.Printf("Password:    %s\n", "[stored in keychain]")
 	fmt.Printf("Database:    %s\n", profile.Database)
 	fmt.Println("------------------------------")
 }

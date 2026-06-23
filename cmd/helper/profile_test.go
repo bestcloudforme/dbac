@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/zalando/go-keyring"
 )
 
 func writeProfileFile(t *testing.T, dir string, profiles Profiles) string {
@@ -28,14 +30,24 @@ func setHome(t *testing.T, dir string) {
 }
 
 func TestReadProfile(t *testing.T) {
+	keyring.MockInit()
+
 	dir := t.TempDir()
 	setHome(t, dir)
+
+	// Pre-store passwords in mock keychain; profiles on disk have no plaintext password.
+	if err := StorePassword("dev", "secret"); err != nil {
+		t.Fatalf("failed to seed keychain: %v", err)
+	}
+	if err := StorePassword("prod", "pass"); err != nil {
+		t.Fatalf("failed to seed keychain: %v", err)
+	}
 
 	profiles := Profiles{
 		Current: "prod",
 		Profiles: []Profile{
-			{Name: "dev", DbType: "psql", Host: "localhost", Port: "5432", User: "dev", Password: "secret", Database: "devdb"},
-			{Name: "prod", DbType: "mysql", Host: "10.0.0.1", Port: "3306", User: "root", Password: "pass", Database: "proddb"},
+			{Name: "dev", DbType: "psql", Host: "localhost", Port: "5432", User: "dev", Database: "devdb"},
+			{Name: "prod", DbType: "mysql", Host: "10.0.0.1", Port: "3306", User: "root", Database: "proddb"},
 		},
 	}
 	writeProfileFile(t, dir, profiles)
@@ -50,6 +62,9 @@ func TestReadProfile(t *testing.T) {
 		}
 		if p.Port != "5432" {
 			t.Errorf("expected port '5432', got %q", p.Port)
+		}
+		if p.Password != "secret" {
+			t.Errorf("expected password 'secret' from keychain, got %q", p.Password)
 		}
 	})
 
@@ -67,6 +82,57 @@ func TestReadProfile(t *testing.T) {
 		p := ReadProfile("prod")
 		if p.DbType != "mysql" {
 			t.Errorf("expected DbType 'mysql', got %q", p.DbType)
+		}
+		if p.Password != "pass" {
+			t.Errorf("expected password 'pass' from keychain, got %q", p.Password)
+		}
+	})
+}
+
+func TestReadProfileMigration(t *testing.T) {
+	keyring.MockInit()
+
+	dir := t.TempDir()
+	setHome(t, dir)
+
+	// Profile has plaintext password in JSON — the legacy state before keychain.
+	profiles := Profiles{
+		Current: "legacy",
+		Profiles: []Profile{
+			{Name: "legacy", DbType: "mysql", Host: "localhost", Port: "3306", User: "admin", Password: "oldpass", Database: "mydb"},
+		},
+	}
+	path := writeProfileFile(t, dir, profiles)
+
+	p := ReadProfile("legacy")
+
+	t.Run("returns correct password after migration", func(t *testing.T) {
+		if p.Password != "oldpass" {
+			t.Errorf("expected password 'oldpass', got %q", p.Password)
+		}
+	})
+
+	t.Run("clears plaintext password from JSON after migration", func(t *testing.T) {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("could not read profile file: %v", err)
+		}
+		var got Profiles
+		if err := json.Unmarshal(data, &got); err != nil {
+			t.Fatalf("could not unmarshal: %v", err)
+		}
+		if got.Profiles[0].Password != "" {
+			t.Errorf("expected password cleared from JSON after migration, got %q", got.Profiles[0].Password)
+		}
+	})
+
+	t.Run("password retrievable from keychain after migration", func(t *testing.T) {
+		pw, err := RetrievePassword("legacy")
+		if err != nil {
+			t.Fatalf("failed to retrieve from keychain: %v", err)
+		}
+		if pw != "oldpass" {
+			t.Errorf("expected 'oldpass' in keychain, got %q", pw)
 		}
 	})
 }

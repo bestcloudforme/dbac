@@ -50,6 +50,10 @@ func deleteProfiles(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	if err := helper.DeletePassword(profileName); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to delete password from keychain: %v\n", err)
+	}
+
 	if allProfiles.Current == profileName {
 		if len(newProfiles.Profiles) > 0 {
 			newProfiles.Current = newProfiles.Profiles[0].Name

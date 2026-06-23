@@ -22,6 +22,7 @@ This document provides an overview of the functionalities provided by the Databa
   - [Functions Overview](#functions-overview)
     - [MySQL Functions](#mysql-functions)
     - [PostgreSQL Functions](#postgresql-functions)
+  - [Password Storage](#password-storage)
   - [Contributing](#contributing)
   - [License](#license)
 ## Installation
@@ -168,6 +169,24 @@ dbac batch --file="batch.yaml"
 - **CreateDatabase**: Creates a new database in the PostgreSQL server.
 - **DeleteDatabase**: Deletes a database from the PostgreSQL server.
 - **Dump**: Creates a dump of the PostgreSQL database, enabling the backup of data to a specified path.
+## Password Storage
+
+dbac never stores passwords in plaintext. By default it uses the **OS keychain** (macOS Keychain, GNOME Keyring, KWallet) so credentials are managed by the operating system.
+
+On **headless or server environments** (no keyring daemon available — common on Linux servers, Docker containers, CI pipelines), set the `DBAC_NO_KEYCHAIN` environment variable to switch to **AES-256-GCM** encryption instead. Passwords are encrypted with a machine-derived key and stored in `~/.dbac-passwords.json` (mode `0600`).
+
+```bash
+export DBAC_NO_KEYCHAIN=1
+dbac init
+```
+
+| Mode | When to use | Storage |
+|------|-------------|---------|
+| OS Keychain (default) | Desktop / interactive session | OS keychain |
+| `DBAC_NO_KEYCHAIN=1` | Headless / server / CI | `~/.dbac-passwords.json` (AES-256-GCM) |
+
+> **Note:** Switching modes after profiles are created requires re-adding your profiles, as the two backends store passwords independently.
+
 ## Contributing
 We welcome contributions! Please fork the repository and submit pull requests.
 ## License

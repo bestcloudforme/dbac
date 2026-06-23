@@ -42,10 +42,27 @@ func ReadProfile(profileName string) Profile {
 	if len(profiles.Profiles) == 0 {
 		log.Fatalf("No profiles found in the profile file")
 	}
-	for _, profile := range profiles.Profiles {
-		if profile.Name == profileName {
-			return profile
+	for i, profile := range profiles.Profiles {
+		if profile.Name != profileName {
+			continue
 		}
+		if profile.Password != "" {
+			// Migrate legacy plaintext password to keychain
+			if err := StorePassword(profileName, profile.Password); err != nil {
+				log.Fatalf("Failed to migrate password to keychain for profile '%s': %v", profileName, err)
+			}
+			profiles.Profiles[i].Password = ""
+			if err := WriteProfilesToFile(profiles, profilePath); err != nil {
+				log.Fatalf("Failed to write profile file after keychain migration: %v", err)
+			}
+			return profile // password already set in the local copy
+		}
+		password, err := RetrievePassword(profileName)
+		if err != nil {
+			log.Fatalf("Failed to retrieve password from keychain for profile '%s': %v", profileName, err)
+		}
+		profile.Password = password
+		return profile
 	}
 
 	log.Fatalf("Profile not found: %s", profileName)
@@ -85,6 +102,11 @@ func AddFileProfile(file string) (string, error) {
 		}
 	}
 
+	if err := StorePassword(newProfile.Name, newProfile.Password); err != nil {
+		return "", fmt.Errorf("failed to store password in keychain: %v", err)
+	}
+	newProfile.Password = ""
+
 	allProfiles.Profiles = append(allProfiles.Profiles, newProfile)
 	allProfiles.Current = newProfile.Name
 
@@ -97,6 +119,12 @@ func AddFileProfile(file string) (string, error) {
 
 func InitProfile() {
 	profile := collectProfileData()
+
+	if err := StorePassword(profile.Name, profile.Password); err != nil {
+		log.Fatalf("Failed to store password in keychain: %v", err)
+	}
+	profile.Password = ""
+
 	var allProfiles Profiles
 
 	profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"

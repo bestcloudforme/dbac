@@ -79,12 +79,16 @@ func runAddProfile(cmd *cobra.Command, args []string) {
 		port, _ := cmd.Flags().GetString("port")
 		database, _ := cmd.Flags().GetString("database")
 
+		if err := helper.StorePassword(name, password); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to store password in keychain: %v\n", err)
+			os.Exit(1)
+		}
+
 		profilePath := os.Getenv("HOME") + "/.dbac-profiles.json"
 		newProfile := helper.Profile{
 			DbType:   dbtype,
 			Host:     host,
 			User:     username,
-			Password: password,
 			Database: database,
 			Port:     port,
 			Name:     name,

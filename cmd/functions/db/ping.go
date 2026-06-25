@@ -33,7 +33,7 @@ func runPingDatabase(cmd *cobra.Command, args []string) {
 	switch profile.DbType {
 	case "psql":
 		dbPort, _ := strconv.Atoi(profile.Port)
-		psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database)
+		psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database, profile.SSLMode)
 		psql.Ping()
 		psql.Close()
 	case "mysql":

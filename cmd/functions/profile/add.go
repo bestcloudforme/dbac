@@ -32,6 +32,7 @@ dbac profile add --file mysql-profile.yml
 	cmd.Flags().String("host", "", "Host of the database")
 	cmd.Flags().String("port", "", "Port of the database")
 	cmd.Flags().String("database", "", "Name of the database")
+	cmd.Flags().String("ssl-mode", "", "PostgreSQL SSL mode (disable, allow, prefer, require, verify-ca, verify-full); defaults to require")
 	cmd.Flags().StringP("file", "f", "", "Path to the YAML file containing the profile details")
 
 	subcommand.AddCommand(cmd)
@@ -78,6 +79,7 @@ func runAddProfile(cmd *cobra.Command, args []string) {
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetString("port")
 		database, _ := cmd.Flags().GetString("database")
+		sslmode, _ := cmd.Flags().GetString("ssl-mode")
 
 		if err := helper.StorePassword(name, password); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to store password in keychain: %v\n", err)
@@ -92,6 +94,7 @@ func runAddProfile(cmd *cobra.Command, args []string) {
 			Database: database,
 			Port:     port,
 			Name:     name,
+			SSLMode:  sslmode,
 		}
 
 		var allProfiles helper.Profiles

@@ -211,7 +211,7 @@ func App(param string, step int, file string) {
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
 
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.CreateUser(stepper.Steps[step].Username, stepper.Steps[step].Password)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -241,7 +241,7 @@ func App(param string, step int, file string) {
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
 
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.CreateDatabase(stepper.Steps[step].Database)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -270,7 +270,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.GrantPermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -299,7 +299,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.ChangeUserPassword(stepper.Steps[step].Username, stepper.Steps[step].NewPassword)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -328,7 +328,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.RevokePermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -357,7 +357,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.DeleteUser(stepper.Steps[step].Username)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -386,7 +386,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.DeleteDatabase(stepper.Steps[step].Database)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -415,7 +415,7 @@ func App(param string, step int, file string) {
 		if stepper.Steps[step].File == "" {
 			if currentProfile.DbType == "psql" {
 				db_port, _ := strconv.Atoi(currentProfile.Port)
-				psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+				psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 				psql.Exec(stepper.Steps[step].Query)
 				psql.Close()
 			} else if currentProfile.DbType == "mysql" {
@@ -426,7 +426,7 @@ func App(param string, step int, file string) {
 		} else {
 			if currentProfile.DbType == "psql" {
 				db_port, _ := strconv.Atoi(currentProfile.Port)
-				psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+				psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 				psql.FileExec(stepper.Steps[step].File)
 				psql.Close()
 			} else if currentProfile.DbType == "mysql" {
@@ -457,7 +457,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.RevokeTablePermissions(stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -486,7 +486,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.GrantTablePermissions(stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission)
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -515,7 +515,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.ListDatabases()
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -543,7 +543,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.ListTables()
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {
@@ -571,7 +571,7 @@ func App(param string, step int, file string) {
 
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database)
+			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
 			psql.ListUsers()
 			psql.Close()
 		} else if currentProfile.DbType == "mysql" {

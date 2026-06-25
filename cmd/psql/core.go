@@ -12,9 +12,12 @@ import (
 
 var DbConnection *sql.DB
 
-func NewConnection(host string, port int, user, password, dbname string) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable connect_timeout=10",
-		host, port, user, password, dbname)
+func NewConnection(host string, port int, user, password, dbname, sslmode string) {
+	if sslmode == "" {
+		sslmode = "require"
+	}
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s connect_timeout=10",
+		host, port, user, password, dbname, sslmode)
 	db, err := sql.Open("postgres", psqlInfo)
 
 	if err != nil {

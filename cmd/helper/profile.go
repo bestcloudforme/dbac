@@ -12,13 +12,14 @@ import (
 )
 
 type Profile struct {
-	DbType   string `json:"db-type" yaml:"db-type"`
-	Host     string `json:"host" yaml:"host"`
-	User     string `json:"user" yaml:"user"`
+	DbType  string `json:"db-type" yaml:"db-type"`
+	Host    string `json:"host" yaml:"host"`
+	User    string `json:"user" yaml:"user"`
 	Password string `json:"password" yaml:"password"`
 	Database string `json:"database" yaml:"database"`
-	Name     string `json:"name" yaml:"name"`
-	Port     string `json:"port" yaml:"port"`
+	Name    string `json:"name" yaml:"name"`
+	Port    string `json:"port" yaml:"port"`
+	SSLMode string `json:"ssl-mode" yaml:"ssl-mode"`
 }
 
 type Profiles struct {
@@ -215,7 +216,19 @@ func collectProfileData() Profile {
 	if profile.Port == "" {
 		profile.Port = defaultPort
 	}
-	profile.Name = readRequiredField("[7/7] Profile Name (how you will refer to this profile in CLI)")
+
+	if dbtype == "psql" {
+		fmt.Println("[7/8] PostgreSQL SSL Mode (disable, allow, prefer, require, verify-ca, verify-full) [Default: require]:")
+		fmt.Print("-> ")
+		sslmode, sslErr := reader.ReadString('\n')
+		if sslErr != nil {
+			log.Fatalf("Failed to read input: %v", sslErr)
+		}
+		profile.SSLMode = strings.TrimSpace(sslmode)
+		profile.Name = readRequiredField("[8/8] Profile Name (how you will refer to this profile in CLI)")
+	} else {
+		profile.Name = readRequiredField("[7/7] Profile Name (how you will refer to this profile in CLI)")
+	}
 
 	return profile
 }

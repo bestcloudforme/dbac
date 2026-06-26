@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"syscall"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 func AddProfileCommand(subcommand *cobra.Command) {
 	cmd := &cobra.Command{
-		Use:   "add [--file filepath | [name] --db-type [dbtype] --user [username] --pass [password] --host [hostname] --port [port] --database [database]]",
+		Use:   "add [--file filepath | [name] --db-type [dbtype] --user [username] [--pass password] --host [hostname] --port [port] --database [database]]",
 		Short: "Add a new database profile",
 		Long:  `Adds a new profile to the list of database connection profiles. You can add a profile by providing a YAML file or by specifying details manually.`,
 		Example: `
@@ -61,7 +63,7 @@ func runAddProfile(cmd *cobra.Command, args []string) {
 		name := args[0]
 
 		missingFlags := []string{}
-		requiredFlags := []string{"db-type", "user", "pass", "host", "port", "database"}
+		requiredFlags := []string{"db-type", "user", "host", "port", "database"}
 		for _, flag := range requiredFlags {
 			if !cmd.Flag(flag).Changed {
 				missingFlags = append(missingFlags, flag)
@@ -75,7 +77,25 @@ func runAddProfile(cmd *cobra.Command, args []string) {
 
 		dbtype, _ := cmd.Flags().GetString("db-type")
 		username, _ := cmd.Flags().GetString("user")
-		password, _ := cmd.Flags().GetString("pass")
+
+		var password string
+		if cmd.Flag("pass").Changed {
+			password, _ = cmd.Flags().GetString("pass")
+		} else {
+			fmt.Fprintf(os.Stderr, "Password: ")
+			raw, err := term.ReadPassword(int(syscall.Stdin))
+			fmt.Fprintln(os.Stderr)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to read password: %v\n", err)
+				os.Exit(1)
+			}
+			if len(raw) == 0 {
+				fmt.Fprintf(os.Stderr, "Password cannot be empty\n")
+				os.Exit(1)
+			}
+			password = string(raw)
+		}
+
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetString("port")
 		database, _ := cmd.Flags().GetString("database")

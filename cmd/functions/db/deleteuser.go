@@ -21,6 +21,7 @@ func AddDeleteUserCommand(subcommand *cobra.Command) {
 		Run:     runDeleteUser,
 	}
 	cmd.Flags().String("username", "", "Username of the user to be deleted")
+	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	subcommand.AddCommand(cmd)
 }
 
@@ -36,6 +37,11 @@ func runDeleteUser(cmd *cobra.Command, args []string) {
 		if err := cmd.Help(); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to display help: %v\n", err)
 		}
+		os.Exit(1)
+	}
+	yes, _ := cmd.Flags().GetBool("yes")
+	if !yes && !helper.Confirm(fmt.Sprintf("Delete user %q?", username)) {
+		fmt.Fprintln(os.Stderr, "Aborted.")
 		os.Exit(1)
 	}
 	profile := helper.ReadProfile(currentProfileName)

@@ -3,7 +3,6 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -13,9 +12,8 @@ import (
 
 var DbConnection *sql.DB
 
-func NewConnection(host, port, user, password, dbname string) {
+func NewConnection(host, port, user, password, dbname string) error {
 	addr := fmt.Sprintf("%s:%s", host, port)
-
 	cfg := mysql.Config{
 		User:    user,
 		Passwd:  password,
@@ -24,38 +22,39 @@ func NewConnection(host, port, user, password, dbname string) {
 		DBName:  dbname,
 		Timeout: 10 * time.Second,
 	}
-
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		log.Fatalf("Failed to open database connection: %v", err)
+		return fmt.Errorf("failed to open database connection: %w", err)
 	}
-
 	DbConnection = db
+	return nil
 }
 
-func Ping() {
+func Ping() error {
 	if err := DbConnection.Ping(); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
+		return fmt.Errorf("failed to ping database: %w", err)
 	}
 	fmt.Println("Connection Success")
+	return nil
 }
 
-func Close() {
+func Close() error {
 	if err := DbConnection.Close(); err != nil {
-		log.Fatalf("Failed to close database connection: %v", err)
+		return fmt.Errorf("failed to close database connection: %w", err)
 	}
+	return nil
 }
 
-func Exec(query string) {
+func Exec(query string) error {
 	rows, err := DbConnection.Query(query)
 	if err != nil {
-		log.Fatalf("Failed to execute query: %v", err)
+		return fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
 	columns, err := rows.Columns()
 	if err != nil {
-		log.Fatalf("Failed to get columns: %v", err)
+		return fmt.Errorf("failed to get columns: %w", err)
 	}
 
 	values := make([]sql.RawBytes, len(columns))
@@ -66,40 +65,37 @@ func Exec(query string) {
 
 	for rows.Next() {
 		if err := rows.Scan(scanArgs...); err != nil {
-			log.Fatalf("Failed to scan row: %v", err)
+			return fmt.Errorf("failed to scan row: %w", err)
 		}
-
 		for i, col := range values {
 			fmt.Printf("%s: %s\n", columns[i], col)
 		}
 		fmt.Println("---------------------")
 	}
-
 	if err := rows.Err(); err != nil {
-		log.Fatalf("Failed to iterate over rows: %v", err)
+		return fmt.Errorf("failed to iterate over rows: %w", err)
 	}
-
 	fmt.Println("Query run successfully")
+	return nil
 }
 
-func FileExec(filename string) {
+func FileExec(filename string) error {
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("Failed to read SQL file: %v", err)
+		return fmt.Errorf("failed to read SQL file: %w", err)
 	}
-
 	commands := strings.Split(string(file), ";")
 	for _, cmd := range commands {
 		cmd = strings.TrimSpace(cmd)
 		if cmd == "" {
 			continue
 		}
-
 		if _, err := DbConnection.Exec(cmd); err != nil {
-			log.Fatalf("Failed to execute command: %v", err)
+			return fmt.Errorf("failed to execute command: %w", err)
 		}
 	}
 	fmt.Println("SQL file run successfully")
+	return nil
 }
 
 func quoteIdentifier(name string) string {
@@ -112,11 +108,11 @@ func quoteLiteral(s string) string {
 	return "'" + s + "'"
 }
 
-func validatePermissions(permissions string) string {
+func validatePermissions(permissions string) (string, error) {
 	for _, r := range permissions {
 		if !((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == ' ' || r == ',' || r == '_') {
-			log.Fatalf("invalid permissions: %q", permissions)
+			return "", fmt.Errorf("invalid permissions: %q", permissions)
 		}
 	}
-	return permissions
+	return permissions, nil
 }

@@ -1,15 +1,11 @@
 package mysql
 
-import (
-	"fmt"
-	"log"
-)
+import "fmt"
 
-func ListDatabases() {
-	query := "SHOW DATABASES;"
-	rows, err := DbConnection.Query(query)
+func ListDatabases() error {
+	rows, err := DbConnection.Query("SHOW DATABASES;")
 	if err != nil {
-		log.Fatalf("Failed to execute query: %v", err)
+		return fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -17,25 +13,23 @@ func ListDatabases() {
 	for rows.Next() {
 		var database string
 		if err := rows.Scan(&database); err != nil {
-			log.Fatalf("Failed to scan row: %v", err)
+			return fmt.Errorf("failed to scan row: %w", err)
 		}
 		databases = append(databases, database)
 	}
-
 	if err := rows.Err(); err != nil {
-		log.Fatalf("Row iteration error: %v", err)
+		return fmt.Errorf("failed to iterate over rows: %w", err)
 	}
-
 	for _, db := range databases {
 		fmt.Println(db)
 	}
+	return nil
 }
 
-func ListTables() {
-	query := "SHOW TABLES;"
-	rows, err := DbConnection.Query(query)
+func ListTables() error {
+	rows, err := DbConnection.Query("SHOW TABLES;")
 	if err != nil {
-		log.Fatalf("Failed to execute query: %v", err)
+		return fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -43,34 +37,31 @@ func ListTables() {
 	for rows.Next() {
 		var table string
 		if err := rows.Scan(&table); err != nil {
-			log.Fatalf("Failed to scan row: %v", err)
+			return fmt.Errorf("failed to scan row: %w", err)
 		}
 		tables = append(tables, table)
 	}
-
 	if err := rows.Err(); err != nil {
-		log.Fatalf("Row iteration error: %v", err)
+		return fmt.Errorf("failed to iterate over rows: %w", err)
 	}
-
 	for _, table := range tables {
 		fmt.Println(table)
 	}
+	return nil
 }
 
-func CreateDatabase(database string) {
-	_, err := DbConnection.Exec("CREATE DATABASE " + quoteIdentifier(database) + ";")
-	if err != nil {
-		log.Printf("Database couldn't be created: %v", err)
-		return
+func CreateDatabase(database string) error {
+	if _, err := DbConnection.Exec("CREATE DATABASE " + quoteIdentifier(database) + ";"); err != nil {
+		return fmt.Errorf("failed to create database: %w", err)
 	}
 	fmt.Println("Database created successfully")
+	return nil
 }
 
-func DeleteDatabase(database string) {
-	_, err := DbConnection.Exec("DROP DATABASE " + quoteIdentifier(database) + ";")
-	if err != nil {
-		log.Printf("Database couldn't be deleted: %v", err)
-		return
+func DeleteDatabase(database string) error {
+	if _, err := DbConnection.Exec("DROP DATABASE " + quoteIdentifier(database) + ";"); err != nil {
+		return fmt.Errorf("failed to delete database: %w", err)
 	}
 	fmt.Println("Database deleted successfully")
+	return nil
 }

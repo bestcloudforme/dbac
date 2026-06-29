@@ -1,42 +1,55 @@
 package psql
 
-import (
-	"fmt"
-	"log"
-)
+import "fmt"
 
-func GrantPermissions(database, username, permissions string) {
-	query := "GRANT " + validatePermissions(permissions) + " ON DATABASE " + quoteIdentifier(database) + " TO " + quoteIdentifier(username) + ";"
+func GrantPermissions(database, username, permissions string) error {
+	perm, err := validatePermissions(permissions)
+	if err != nil {
+		return err
+	}
+	query := "GRANT " + perm + " ON DATABASE " + quoteIdentifier(database) + " TO " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
-		log.Printf("Permission couldn't be added: %v", err)
-		return
+		return fmt.Errorf("failed to grant permissions: %w", err)
 	}
 	fmt.Println("Permission added successfully")
+	return nil
 }
 
-func RevokePermissions(database, username, permissions string) {
-	query := "REVOKE " + validatePermissions(permissions) + " ON DATABASE " + quoteIdentifier(database) + " FROM " + quoteIdentifier(username) + ";"
+func RevokePermissions(database, username, permissions string) error {
+	perm, err := validatePermissions(permissions)
+	if err != nil {
+		return err
+	}
+	query := "REVOKE " + perm + " ON DATABASE " + quoteIdentifier(database) + " FROM " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
-		log.Printf("Permission couldn't be revoked: %v", err)
-		return
+		return fmt.Errorf("failed to revoke permissions: %w", err)
 	}
 	fmt.Println("Permission revoked successfully")
+	return nil
 }
 
-func GrantTablePermissions(table, username, permissions string) {
-	query := "GRANT " + validatePermissions(permissions) + " ON " + quoteIdentifier(table) + " TO " + quoteIdentifier(username) + ";"
+func GrantTablePermissions(table, username, permissions string) error {
+	perm, err := validatePermissions(permissions)
+	if err != nil {
+		return err
+	}
+	query := "GRANT " + perm + " ON " + quoteIdentifier(table) + " TO " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
-		log.Printf("Permission couldn't be added: %v", err)
-		return
+		return fmt.Errorf("failed to grant table permissions: %w", err)
 	}
 	fmt.Println("Permission added successfully")
+	return nil
 }
 
-func RevokeTablePermissions(table, username, permissions string) {
-	query := "REVOKE " + validatePermissions(permissions) + " ON " + quoteIdentifier(table) + " FROM " + quoteIdentifier(username) + ";"
+func RevokeTablePermissions(table, username, permissions string) error {
+	perm, err := validatePermissions(permissions)
+	if err != nil {
+		return err
+	}
+	query := "REVOKE " + perm + " ON " + quoteIdentifier(table) + " FROM " + quoteIdentifier(username) + ";"
 	if _, err := DbConnection.Exec(query); err != nil {
-		log.Printf("Permission couldn't be revoked: %v", err)
-		return
+		return fmt.Errorf("failed to revoke table permissions: %w", err)
 	}
 	fmt.Println("Permission revoked successfully")
+	return nil
 }

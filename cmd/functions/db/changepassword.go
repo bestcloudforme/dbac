@@ -20,7 +20,6 @@ func AddChangePasswordCommand(subcommand *cobra.Command) {
 		Args:    cobra.NoArgs,
 		Run:     runChangePassword,
 	}
-
 	cmd.Flags().String("username", "", "Username of the user whose password is to be changed")
 	cmd.Flags().String("new-password", "", "New password for the user")
 	subcommand.AddCommand(cmd)
@@ -45,12 +44,30 @@ func runChangePassword(cmd *cobra.Command, args []string) {
 	switch profile.DbType {
 	case "psql":
 		dbPort, _ := strconv.Atoi(profile.Port)
-		psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database, profile.SSLMode)
-		psql.ChangeUserPassword(username, newPassword)
-		psql.Close()
+		if err := psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database, profile.SSLMode); err != nil {
+			fmt.Fprintf(os.Stderr, "Error connecting to database: %v\n", err)
+			os.Exit(1)
+		}
+		if err := psql.ChangeUserPassword(username, newPassword); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		if err := psql.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing connection: %v\n", err)
+			os.Exit(1)
+		}
 	case "mysql":
-		mysql.NewConnection(profile.Host, profile.Port, profile.User, profile.Password, profile.Database)
-		mysql.ChangeUserPassword(username, newPassword)
-		mysql.Close()
+		if err := mysql.NewConnection(profile.Host, profile.Port, profile.User, profile.Password, profile.Database); err != nil {
+			fmt.Fprintf(os.Stderr, "Error connecting to database: %v\n", err)
+			os.Exit(1)
+		}
+		if err := mysql.ChangeUserPassword(username, newPassword); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		if err := mysql.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing connection: %v\n", err)
+			os.Exit(1)
+		}
 	}
 }

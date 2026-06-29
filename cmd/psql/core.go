@@ -3,7 +3,6 @@ package psql
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -12,63 +11,63 @@ import (
 
 var DbConnection *sql.DB
 
-func NewConnection(host string, port int, user, password, dbname, sslmode string) {
+func NewConnection(host string, port int, user, password, dbname, sslmode string) error {
 	if sslmode == "" {
 		sslmode = "require"
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s connect_timeout=10",
 		host, port, user, password, dbname, sslmode)
 	db, err := sql.Open("postgres", psqlInfo)
-
 	if err != nil {
-		log.Fatalf("Failed to open database connection: %v", err)
+		return fmt.Errorf("failed to open database connection: %w", err)
 	}
-
 	if err := db.Ping(); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
+		return fmt.Errorf("failed to ping database: %w", err)
 	}
-
 	DbConnection = db
+	return nil
 }
 
-func Ping() {
+func Ping() error {
 	if DbConnection == nil {
-		log.Fatalf("No database connection established")
+		return fmt.Errorf("no database connection established")
 	}
 	if err := DbConnection.Ping(); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
+		return fmt.Errorf("failed to ping database: %w", err)
 	}
 	fmt.Println("Connection Success")
+	return nil
 }
 
-func Close() {
+func Close() error {
 	if DbConnection == nil {
-		log.Fatalf("No database connection established")
+		return fmt.Errorf("no database connection established")
 	}
 	if err := DbConnection.Close(); err != nil {
-		log.Fatalf("Failed to close database connection: %v", err)
+		return fmt.Errorf("failed to close database connection: %w", err)
 	}
+	return nil
 }
 
-func Exec(query string) {
+func Exec(query string) error {
 	if DbConnection == nil {
-		log.Fatalf("No database connection established")
+		return fmt.Errorf("no database connection established")
 	}
 	if _, err := DbConnection.Exec(query); err != nil {
-		log.Fatalf("Failed to execute query: %v", err)
+		return fmt.Errorf("failed to execute query: %w", err)
 	}
 	fmt.Println("Query executed successfully")
+	return nil
 }
 
-func FileExec(filename string) {
+func FileExec(filename string) error {
 	if DbConnection == nil {
-		log.Fatalf("No database connection established")
+		return fmt.Errorf("no database connection established")
 	}
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("Failed to read SQL file: %v", err)
+		return fmt.Errorf("failed to read SQL file: %w", err)
 	}
-
 	requests := strings.Split(string(file), ";")
 	for _, request := range requests {
 		request = strings.TrimSpace(request)
@@ -76,20 +75,21 @@ func FileExec(filename string) {
 			continue
 		}
 		if _, err := DbConnection.Exec(request); err != nil {
-			log.Fatalf("Failed to execute command: %v", err)
+			return fmt.Errorf("failed to execute command: %w", err)
 		}
 	}
 	fmt.Println("SQL file executed successfully")
+	return nil
 }
 
 func quoteIdentifier(name string) string { return pq.QuoteIdentifier(name) }
 func quoteLiteral(s string) string       { return pq.QuoteLiteral(s) }
 
-func validatePermissions(permissions string) string {
+func validatePermissions(permissions string) (string, error) {
 	for _, r := range permissions {
 		if !((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == ' ' || r == ',' || r == '_') {
-			log.Fatalf("invalid permissions: %q", permissions)
+			return "", fmt.Errorf("invalid permissions: %q", permissions)
 		}
 	}
-	return permissions
+	return permissions, nil
 }

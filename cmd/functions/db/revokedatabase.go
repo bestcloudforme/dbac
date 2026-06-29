@@ -52,12 +52,30 @@ func runRevokeDatabase(cmd *cobra.Command, args []string) {
 	switch profile.DbType {
 	case "psql":
 		dbPort, _ := strconv.Atoi(profile.Port)
-		psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database, profile.SSLMode)
-		psql.RevokePermissions(database, username, permission)
-		psql.Close()
+		if err := psql.NewConnection(profile.Host, dbPort, profile.User, profile.Password, profile.Database, profile.SSLMode); err != nil {
+			fmt.Fprintf(os.Stderr, "Error connecting to database: %v\n", err)
+			os.Exit(1)
+		}
+		if err := psql.RevokePermissions(database, username, permission); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		if err := psql.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing connection: %v\n", err)
+			os.Exit(1)
+		}
 	case "mysql":
-		mysql.NewConnection(profile.Host, profile.Port, profile.User, profile.Password, profile.Database)
-		mysql.RevokePermissions(database, username, permission)
-		mysql.Close()
+		if err := mysql.NewConnection(profile.Host, profile.Port, profile.User, profile.Password, profile.Database); err != nil {
+			fmt.Fprintf(os.Stderr, "Error connecting to database: %v\n", err)
+			os.Exit(1)
+		}
+		if err := mysql.RevokePermissions(database, username, permission); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		if err := mysql.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing connection: %v\n", err)
+			os.Exit(1)
+		}
 	}
 }

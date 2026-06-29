@@ -4,7 +4,6 @@ import (
 	"dbac/cmd/mysql"
 	"dbac/cmd/psql"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -171,17 +170,24 @@ type ExecCommandSteps struct {
 	Steps []ExecCommand `yaml:"steps"`
 }
 
+func exitOnErr(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
 func RunBatch(file string) {
 	var stepper Steps
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+		os.Exit(1)
 	}
-	err = yaml.Unmarshal(yamlFile, &stepper)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+	if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+		os.Exit(1)
 	}
-
 	for i := 0; i < len(stepper.Steps); i++ {
 		App(stepper.Steps[i].Type, i, file)
 	}
@@ -194,30 +200,28 @@ func App(param string, step int, file string) {
 		var stepper CreateUserSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
-
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
 			currentProfile = ReadProfile(currentProfileName)
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.CreateUser(stepper.Steps[step].Username, stepper.Steps[step].Password)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.CreateUser(stepper.Steps[step].Username, stepper.Steps[step].Password))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.CreateUser(stepper.Steps[step].Username, stepper.Steps[step].Password)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.CreateUser(stepper.Steps[step].Username, stepper.Steps[step].Password))
+			exitOnErr(mysql.Close())
 		}
 
 	case "create-database":
@@ -225,11 +229,12 @@ func App(param string, step int, file string) {
 		var stepper CreateDatabaseSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -237,17 +242,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.CreateDatabase(stepper.Steps[step].Database)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.CreateDatabase(stepper.Steps[step].Database))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.CreateDatabase(stepper.Steps[step].Database)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.CreateDatabase(stepper.Steps[step].Database))
+			exitOnErr(mysql.Close())
 		}
 
 	case "grant-database":
@@ -255,11 +258,12 @@ func App(param string, step int, file string) {
 		var stepper GrantDatabaseSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -267,16 +271,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.GrantPermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.GrantPermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.GrantPermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.GrantPermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(mysql.Close())
 		}
 
 	case "change-password":
@@ -284,11 +287,12 @@ func App(param string, step int, file string) {
 		var stepper ChangePasswordSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -296,16 +300,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.ChangeUserPassword(stepper.Steps[step].Username, stepper.Steps[step].NewPassword)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.ChangeUserPassword(stepper.Steps[step].Username, stepper.Steps[step].NewPassword))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.ChangeUserPassword(stepper.Steps[step].Username, stepper.Steps[step].NewPassword)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.ChangeUserPassword(stepper.Steps[step].Username, stepper.Steps[step].NewPassword))
+			exitOnErr(mysql.Close())
 		}
 
 	case "revoke-database":
@@ -313,11 +316,12 @@ func App(param string, step int, file string) {
 		var stepper RevokeDatabaseSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -325,16 +329,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.RevokePermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.RevokePermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.RevokePermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.RevokePermissions(stepper.Steps[step].Database, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(mysql.Close())
 		}
 
 	case "delete-user":
@@ -342,11 +345,12 @@ func App(param string, step int, file string) {
 		var stepper DeleteUserSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -354,16 +358,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.DeleteUser(stepper.Steps[step].Username)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.DeleteUser(stepper.Steps[step].Username))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.DeleteUser(stepper.Steps[step].Username)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.DeleteUser(stepper.Steps[step].Username))
+			exitOnErr(mysql.Close())
 		}
 
 	case "delete-database":
@@ -371,11 +374,12 @@ func App(param string, step int, file string) {
 		var stepper DeleteDatabaseSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -383,16 +387,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.DeleteDatabase(stepper.Steps[step].Database)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.DeleteDatabase(stepper.Steps[step].Database))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.DeleteDatabase(stepper.Steps[step].Database)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.DeleteDatabase(stepper.Steps[step].Database))
+			exitOnErr(mysql.Close())
 		}
 
 	case "exec":
@@ -400,11 +403,12 @@ func App(param string, step int, file string) {
 		var stepper ExecCommandSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -415,25 +419,25 @@ func App(param string, step int, file string) {
 		if stepper.Steps[step].File == "" {
 			if currentProfile.DbType == "psql" {
 				db_port, _ := strconv.Atoi(currentProfile.Port)
-				psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-				psql.Exec(stepper.Steps[step].Query)
-				psql.Close()
+				exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+				exitOnErr(psql.Exec(stepper.Steps[step].Query))
+				exitOnErr(psql.Close())
 			} else if currentProfile.DbType == "mysql" {
-				mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-				mysql.Exec(stepper.Steps[step].Query)
-				mysql.Close()
+				exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+				exitOnErr(mysql.Exec(stepper.Steps[step].Query))
+				exitOnErr(mysql.Close())
 			}
 		} else {
 			if currentProfile.DbType == "psql" {
 				db_port, _ := strconv.Atoi(currentProfile.Port)
-				psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-				psql.FileExec(stepper.Steps[step].File)
-				psql.Close()
+				exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+				exitOnErr(psql.FileExec(stepper.Steps[step].File))
+				exitOnErr(psql.Close())
 			} else if currentProfile.DbType == "mysql" {
 				fmt.Println(stepper.Steps[step].File)
-				mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-				mysql.FileExec(stepper.Steps[step].File)
-				mysql.Close()
+				exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+				exitOnErr(mysql.FileExec(stepper.Steps[step].File))
+				exitOnErr(mysql.Close())
 			}
 		}
 
@@ -442,11 +446,12 @@ func App(param string, step int, file string) {
 		var stepper RevokeTableSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -454,16 +459,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.RevokeTablePermissions(stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.RevokeTablePermissions(stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.RevokeTablePermissions(currentProfile.Database, stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.RevokeTablePermissions(currentProfile.Database, stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(mysql.Close())
 		}
 
 	case "grant-table":
@@ -471,11 +475,12 @@ func App(param string, step int, file string) {
 		var stepper GrantTableSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -483,16 +488,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.GrantTablePermissions(stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.GrantTablePermissions(stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.GrantTablePermissions(currentProfile.Database, stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission)
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.GrantTablePermissions(currentProfile.Database, stepper.Steps[step].Table, stepper.Steps[step].Username, stepper.Steps[step].Permission))
+			exitOnErr(mysql.Close())
 		}
 
 	case "list-databases":
@@ -500,11 +504,12 @@ func App(param string, step int, file string) {
 		var stepper ListDatabasesSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -512,27 +517,28 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.ListDatabases()
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.ListDatabases())
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.ListDatabases()
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.ListDatabases())
+			exitOnErr(mysql.Close())
 		}
+
 	case "list-tables":
 		var currentProfile Profile
 		var stepper ListTablesSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -540,27 +546,28 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.ListTables()
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.ListTables())
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.ListTables()
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.ListTables())
+			exitOnErr(mysql.Close())
 		}
+
 	case "list-users":
 		var currentProfile Profile
 		var stepper ListUsersSteps
 		yamlFile, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			fmt.Fprintf(os.Stderr, "Error reading batch file: %v\n", err)
+			os.Exit(1)
 		}
-		err = yaml.Unmarshal(yamlFile, &stepper)
-		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+		if err := yaml.Unmarshal(yamlFile, &stepper); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing batch file: %v\n", err)
+			os.Exit(1)
 		}
 		if stepper.Steps[step].Profile == "" {
 			currentProfileName, _ := GetCurrentProfileName()
@@ -568,16 +575,15 @@ func App(param string, step int, file string) {
 		} else {
 			currentProfile = ReadProfile(stepper.Steps[step].Profile)
 		}
-
 		if currentProfile.DbType == "psql" {
 			db_port, _ := strconv.Atoi(currentProfile.Port)
-			psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode)
-			psql.ListUsers()
-			psql.Close()
+			exitOnErr(psql.NewConnection(currentProfile.Host, db_port, currentProfile.User, currentProfile.Password, currentProfile.Database, currentProfile.SSLMode))
+			exitOnErr(psql.ListUsers())
+			exitOnErr(psql.Close())
 		} else if currentProfile.DbType == "mysql" {
-			mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database)
-			mysql.ListUsers()
-			mysql.Close()
+			exitOnErr(mysql.NewConnection(currentProfile.Host, currentProfile.Port, currentProfile.User, currentProfile.Password, currentProfile.Database))
+			exitOnErr(mysql.ListUsers())
+			exitOnErr(mysql.Close())
 		}
 	}
 }
